@@ -1,50 +1,80 @@
 # 🚀 HireFlow-AI
 
-An AI-powered Applicant Tracking System (ATS) built using the MERN Stack. HireFlow-AI helps recruiters manage job postings, screen resumes, and automate candidate evaluation using AI.
+An AI-powered Applicant Tracking System (ATS) built using the MERN Stack. HireFlow-AI streamlines the recruitment process by allowing recruiters to post jobs, manage applications, and leverage AI for resume screening and interview preparation.
 
-> **Current Status:** Phase 2 Completed ✅ (Authentication & Role-Based Authorization)
+> **Current Status:** ✅ Phase 3 Completed (Professional Job Management APIs)
 
 ---
 
-# 📌 Features Completed
+# ✨ Features Implemented
 
-### Authentication
-- ✅ User Registration
-- ✅ User Login
-- ✅ Password Hashing using bcrypt
-- ✅ JWT Authentication
-- ✅ Protected Routes
-- ✅ Current Logged-in User API
-- ✅ Role-Based Authorization
-- ✅ Global Error Handling
-- ✅ Standard API Response Structure
+## 🔐 Authentication & Authorization
+
+- User Registration
+- User Login
+- Password Hashing (bcrypt)
+- JWT Authentication
+- Protected Routes
+- Current Logged-in User API
+- Role-Based Authorization
+- Admin-only Routes
+
+---
+
+## 💼 Job Management
+
+### Recruiter/Admin
+
+- Create Job
+- Update Job
+- Delete Job
+
+### Public APIs
+
+- View All Jobs
+- View Job Details
+
+---
+
+## 🔍 Advanced Job APIs
+
+- Search Jobs
+- Filter by Location
+- Filter by Employment Type
+- Filter by Experience
+- Pagination
+- Sorting
+- Recruiter Dashboard Statistics
 
 ---
 
 # 🛠 Tech Stack
 
 ## Frontend
+
 - React.js
 - Vite
 - React Router DOM
 - Axios
-- Tailwind CSS *(Coming Soon)*
+- Tailwind CSS *(Frontend Coming Soon)*
 
 ## Backend
+
 - Node.js
 - Express.js
 - MongoDB Atlas
 - Mongoose
 
 ## Authentication
-- JWT (JSON Web Token)
+
+- JWT
 - bcrypt
 
-## Tools
-- Postman
-- Git
-- GitHub
-- VS Code
+## File Handling
+
+- Multer *(Upcoming)*
+- Cloudinary *(Upcoming)*
+- pdf-parse *(Upcoming)*
 
 ---
 
@@ -54,33 +84,39 @@ An AI-powered Applicant Tracking System (ATS) built using the MERN Stack. HireFl
 HireFlow-AI/
 
 │── client/
-│
+
 │── server/
-│   ├── config/
-│   ├── controllers/
-│   ├── middlewares/
-│   ├── models/
-│   ├── routes/
-│   ├── uploads/
-│   ├── utils/
-│   ├── .env
-│   ├── app.js
-│   └── server.js
 │
-└── README.md
+├── config/
+├── controllers/
+│     ├── authController.js
+│     └── jobController.js
+│
+├── middlewares/
+│     ├── authMiddleware.js
+│     ├── authorize.js
+│     └── errorHandler.js
+│
+├── models/
+│     ├── User.js
+│     └── Job.js
+│
+├── routes/
+│     ├── authRoutes.js
+│     └── jobRoutes.js
+│
+├── utils/
+│
+├── app.js
+├── server.js
+└── .env
 ```
 
 ---
 
-# 🗄 Database
+# 🗄 Database Collections
 
-Current Collection
-
-```
-users
-```
-
-User Schema
+## Users
 
 ```
 User
@@ -97,6 +133,27 @@ User
 
 ---
 
+## Jobs
+
+```
+Job
+
+├── title
+├── company
+├── location
+├── description
+├── requirements
+├── salary
+├── employmentType
+├── experience
+├── status
+├── recruiter
+├── createdAt
+└── updatedAt
+```
+
+---
+
 # 🔐 Authentication Flow
 
 ```
@@ -104,19 +161,11 @@ Register
 
 ↓
 
-Validate User
-
-↓
-
 Hash Password
 
 ↓
 
-Save User
-
-↓
-
-Generate JWT
+Store User
 
 ↓
 
@@ -132,104 +181,135 @@ Generate JWT
 
 ↓
 
-Protected Routes
-
-↓
-
 Authentication Middleware
 
 ↓
 
 Authorization Middleware
+
+↓
+
+Protected Routes
 ```
 
 ---
 
 # 📡 API Endpoints
 
-## Register
+## Authentication
+
+| Method | Endpoint | Description |
+|----------|--------------------|---------------------------|
+| POST | /api/auth/register | Register User |
+| POST | /api/auth/login | Login User |
+| GET | /api/auth/me | Current Logged-in User |
+| GET | /api/auth/admin | Admin Route |
+
+---
+
+## Jobs
+
+| Method | Endpoint | Description |
+|----------|--------------------------|-----------------------------|
+| POST | /api/jobs | Create Job |
+| GET | /api/jobs | Get All Jobs |
+| GET | /api/jobs/:id | Get Single Job |
+| PATCH | /api/jobs/:id | Update Job |
+| DELETE | /api/jobs/:id | Delete Job |
+| GET | /api/jobs/dashboard/stats | Dashboard Statistics |
+
+---
+
+# 🔎 Search API
+
+Example
 
 ```
-POST /api/auth/register
-```
-
-Request
-
-```json
-{
-    "name":"Adarsh",
-    "email":"adarsh@gmail.com",
-    "password":"Adarsh@123",
-    "role":"candidate"
-}
+GET /api/jobs?search=react
 ```
 
 ---
 
-## Login
+# 📍 Filters
 
 ```
-POST /api/auth/login
+GET /api/jobs?location=Remote
 ```
 
-Request
-
-```json
-{
-    "email":"adarsh@gmail.com",
-    "password":"Adarsh@123"
-}
+```
+GET /api/jobs?employmentType=Internship
 ```
 
----
-
-## Current User
-
 ```
-GET /api/auth/me
-```
-
-Header
-
-```
-Authorization: Bearer YOUR_JWT_TOKEN
+GET /api/jobs?experience=Fresher
 ```
 
 ---
 
-## Admin Route
+# 📄 Pagination
 
 ```
-GET /api/auth/admin
+GET /api/jobs?page=1&limit=10
 ```
 
-Header
+---
+
+# ↕ Sorting
+
+Latest
 
 ```
-Authorization: Bearer YOUR_JWT_TOKEN
+GET /api/jobs?sort=latest
 ```
+
+Highest Salary
+
+```
+GET /api/jobs?sort=salary_desc
+```
+
+Lowest Salary
+
+```
+GET /api/jobs?sort=salary_asc
+```
+
+---
+
+# 📊 Dashboard API
+
+```
+GET /api/jobs/dashboard/stats
+```
+
+Returns
+
+- Total Jobs
+- Open Jobs
+- Closed Jobs
+- Recent Jobs
 
 ---
 
 # 🔑 Roles
 
 | Role | Permissions |
-|------|-------------|
-| Candidate | Register, Login, View Profile |
-| Recruiter | Coming Soon |
-| Admin | Access Admin Routes |
+|--------|----------------------------------------|
+| Candidate | View Jobs |
+| Recruiter | Manage Jobs |
+| Admin | Manage Everything |
 
 ---
 
-# 🔒 Security Features
+# 🛡 Security Features
 
-- Password hashing using bcrypt
 - JWT Authentication
+- Password Hashing
 - Protected Routes
 - Role-Based Authorization
+- Ownership Authorization
 - Global Error Handling
 - Standard API Responses
-- Password removed from API responses
 
 ---
 
@@ -241,7 +321,7 @@ Authorization: Bearer YOUR_JWT_TOKEN
 git clone https://github.com/Adarsh2059/HireFlow-AI.git
 ```
 
-Move into project
+Move into the project
 
 ```bash
 cd HireFlow-AI
@@ -249,15 +329,10 @@ cd HireFlow-AI
 
 ---
 
-## Backend Setup
+## Backend
 
 ```bash
 cd server
-```
-
-Install dependencies
-
-```bash
 npm install
 ```
 
@@ -266,14 +341,14 @@ Create `.env`
 ```env
 PORT=5000
 
-MONGODB_URI=your_mongodb_connection_string
+MONGODB_URI=your_connection_string
 
-JWT_SECRET=your_secret_key
+JWT_SECRET=your_secret
 
 JWT_EXPIRES_IN=7d
 ```
 
-Run backend
+Run
 
 ```bash
 npm run dev
@@ -281,7 +356,7 @@ npm run dev
 
 ---
 
-## Frontend Setup
+## Frontend
 
 ```bash
 cd client
@@ -291,69 +366,86 @@ npm run dev
 
 ---
 
-# 🧪 API Testing
+# 📚 Concepts Implemented
 
-The APIs were tested using **Postman**.
-
-Authentication endpoints tested:
-
-- Register User
-- Login User
-- Get Current User
-- Admin Route
-- Invalid Credentials
-- Missing Token
-- Invalid Token
-
----
-
-# 📖 Concepts Implemented
-
-- REST APIs
 - Express Routing
 - Controllers
 - Middleware
+- MongoDB Relationships
+- Mongoose Populate
 - JWT Authentication
-- Role-Based Authorization (RBAC)
-- MongoDB Models
-- Password Hashing
-- API Error Handling
-- API Response Standardization
+- Role-Based Authorization
+- Ownership Authorization
+- Search using Regex
+- Query Parameters
+- Pagination
+- Sorting
+- Dashboard Statistics
+- REST APIs
 
 ---
 
-# 🚧 Upcoming Features (Phase 3)
+# 🧪 API Testing
 
-- Recruiter Dashboard
-- Candidate Dashboard
-- Job CRUD APIs
-- Job Applications
+Tested using Postman
+
+- Register
+- Login
+- Create Job
+- Get Jobs
+- Search Jobs
+- Filter Jobs
+- Pagination
+- Sorting
+- Update Job
+- Delete Job
+- Dashboard Statistics
+
+---
+
+# 🚀 Upcoming Features
+
+## Phase 4
+
+- Candidate Applications
+- Prevent Duplicate Applications
+- Application Status
+- Recruiter Applicant Management
+
+---
+
+## Phase 5
+
 - Resume Upload
+- Cloudinary Integration
 - PDF Parsing
-- Resume Management
 
 ---
 
-# 🤖 Upcoming AI Features
+## Phase 6
 
-- Resume Parsing
-- ATS Score Calculation
+- AI Resume Screening
+- ATS Score
 - Resume Ranking
-- AI Resume Feedback
-- Interview Question Generation
-- Candidate Skill Analysis
+- Skill Gap Analysis
+- AI Interview Questions
 
 ---
 
-# 📈 Project Roadmap
+## Phase 7
 
-- ✅ Phase 1 – Project Setup
-- ✅ Phase 2 – Authentication & Authorization
-- 🔄 Phase 3 – Job Management
-- ⏳ Phase 4 – Resume Upload
-- ⏳ Phase 5 – AI Resume Screening
-- ⏳ Phase 6 – Interview Module
-- ⏳ Phase 7 – Deployment
+- React Dashboard
+- Candidate Dashboard
+- Recruiter Dashboard
+
+---
+
+## Phase 8
+
+- Deployment
+- Docker
+- CI/CD
+- Production Security
 
 ---
 
@@ -365,4 +457,4 @@ GitHub: https://github.com/Adarsh2059
 
 ---
 
-## ⭐ If you find this project useful, don't forget to star the repository!
+⭐ If you like this project, consider giving it a star!

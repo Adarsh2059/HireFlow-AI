@@ -57,15 +57,104 @@ export const createJob = async (req, res, next) => {
 export const getAllJobs = async (req, res, next) => {
     try {
 
-        const jobs = await Job.find()
+        const {
+            search,
+            location,
+            employmentType,
+            experience,
+            page = 1,
+            limit = 10,
+            sort = "latest",
+        } = req.query;
+
+        let filter = {};
+
+         let sortOption = {};
+
+switch (sort) {
+    case "latest":
+        sortOption = { createdAt: -1 };
+        break;
+
+    case "oldest":
+        sortOption = { createdAt: 1 };
+        break;
+
+    case "salary_desc":
+        sortOption = { salary: -1 };
+        break;
+
+    case "salary_asc":
+        sortOption = { salary: 1 };
+        break;
+
+    default:
+        sortOption = { createdAt: -1 };
+}
+
+        // Search
+        if (search) {
+            filter.$or = [
+                {
+                    title: {
+                        $regex: search,
+                        $options: "i",
+                    },
+                },
+                {
+                    company: {
+                        $regex: search,
+                        $options: "i",
+                    },
+                },
+            ];
+        }
+
+        // Filters
+        if (location) {
+            filter.location = {
+                $regex: location,
+                $options: "i",
+            };
+        }
+
+        if (employmentType) {
+            filter.employmentType = employmentType;
+        }
+
+        if (experience) {
+            filter.experience = experience;
+        }
+
+        // Convert to Number
+        const pageNumber = Number(page);
+        const limitNumber = Number(limit);
+
+        // Skip Formula
+        const skip = (pageNumber - 1) * limitNumber;
+
+        // Total Jobs
+        const totalJobs = await Job.countDocuments(filter);
+
+        const jobs = await Job.find(filter)
             .populate("recruiter", "name email")
-            .sort({ createdAt: -1 });
+            .sort({ sortOption })
+            .skip(skip)
+            .limit(limitNumber);
 
         res.status(200).json(
             new ApiResponse(
                 200,
                 "Jobs fetched successfully",
-                jobs
+                {
+                    jobs,
+                    pagination: {
+                        totalJobs,
+                        currentPage: pageNumber,
+                        totalPages: Math.ceil(totalJobs / limitNumber),
+                        limit: limitNumber,
+                    },
+                }
             )
         );
 
@@ -169,6 +258,58 @@ export const deleteJob = async (req, res, next) => {
                 200,
                 "Job deleted successfully",
                 null
+            )
+        );
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getDashboardStats = async (req, res, next) => {
+    try {
+
+        const recruiterId = req.user._id;
+
+        const [
+            totalJobs,
+            openJobs,
+            closedJobs,
+            recentJobs,
+        ] = await Promise.all([
+
+            Job.countDocuments({
+                recruiter: recruiterId,
+            }),
+
+            Job.countDocuments({
+                recruiter: recruiterId,
+                status: "Open",
+            }),
+
+            Job.countDocuments({
+                recruiter: recruiterId,
+                status: "Closed",
+            }),
+
+            Job.find({
+                recruiter: recruiterId,
+            })
+                .sort({ createdAt: -1 })
+                .limit(5)
+
+        ]);
+
+        res.status(200).json(
+            new ApiResponse(
+                200,
+                "Dashboard fetched successfully",
+                {
+                    totalJobs,
+                    openJobs,
+                    closedJobs,
+                    recentJobs,
+                }
             )
         );
 

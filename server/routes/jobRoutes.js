@@ -1,11 +1,18 @@
 import express from "express";
 
-import { createJob,getAllJobs,getJobById,patchJob,deleteJob } from "../controllers/jobController.js";
+import { createJob,getAllJobs,getJobById,patchJob,deleteJob,getDashboardStats } from "../controllers/jobController.js";
 
 import protect from "../middlewares/authMiddleware.js";
 import authorize from "../middlewares/authorize.js";
 
 const router = express.Router();
+
+router.get(
+    "/dashboard/stats",
+    protect,
+    authorize("recruiter", "admin"),
+    getDashboardStats
+);
 
 router.get("/", getAllJobs);
 
