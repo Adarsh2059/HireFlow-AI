@@ -1,50 +1,124 @@
 # 🚀 HireFlow-AI
 
-An AI-powered Applicant Tracking System (ATS) built using the MERN Stack. HireFlow-AI streamlines the recruitment process by allowing recruiters to post jobs, manage applications, and leverage AI for resume screening and interview preparation.
+An AI-powered Applicant Tracking System (ATS) built using the MERN Stack.
 
-> **Current Status:** ✅ Phase 3 Completed (Professional Job Management APIs)
+HireFlow-AI helps recruiters streamline the hiring process by managing job postings, candidate applications, resume processing, and AI-powered resume screening.
+
+> **Current Progress:** ✅ Phase 4 Completed
 
 ---
 
-# ✨ Features Implemented
+# ✨ Features
 
 ## 🔐 Authentication & Authorization
 
 - User Registration
 - User Login
-- Password Hashing (bcrypt)
 - JWT Authentication
-- Protected Routes
+- Password Hashing using bcrypt
 - Current Logged-in User API
+- Protected Routes
 - Role-Based Authorization
-- Admin-only Routes
+- Admin Authorization
 
 ---
 
-## 💼 Job Management
+# 👥 User Roles
 
-### Recruiter/Admin
+### Candidate
+
+- Browse Jobs
+- Search Jobs
+- Apply for Jobs
+- View Applied Jobs
+- Withdraw Applications
+
+### Recruiter
+
+- Create Jobs
+- Update Jobs
+- Delete Jobs
+- View Applicants
+- Update Application Status
+
+### Admin
+
+- Full Access
+- Manage Jobs
+- Manage Applications
+
+---
+
+# 💼 Job Management
 
 - Create Job
 - Update Job
 - Delete Job
-
-### Public APIs
-
 - View All Jobs
-- View Job Details
+- View Single Job
 
 ---
 
-## 🔍 Advanced Job APIs
+# 🔎 Advanced Job APIs
 
-- Search Jobs
+- Search by Title
+- Search by Company
 - Filter by Location
-- Filter by Employment Type
 - Filter by Experience
+- Filter by Employment Type
 - Pagination
 - Sorting
-- Recruiter Dashboard Statistics
+- Dashboard Statistics
+
+---
+
+# 📄 Application Management
+
+### Candidate
+
+- Apply for Job
+- Prevent Duplicate Applications
+- View My Applications
+- Withdraw Application
+
+### Recruiter
+
+- View Applicants
+- Update Application Status
+
+---
+
+# 🔄 Application Workflow
+
+```
+
+Applied
+
+↓
+
+Screening
+
+↓
+
+Shortlisted
+
+↓
+
+Interview
+
+↓
+
+Selected
+
+↓
+
+Hired
+
+```
+
+Candidates may withdraw before the hiring process is completed.
+
+Recruiters may reject candidates during any intermediate stage.
 
 ---
 
@@ -54,9 +128,11 @@ An AI-powered Applicant Tracking System (ATS) built using the MERN Stack. HireFl
 
 - React.js
 - Vite
-- React Router DOM
+- React Router
 - Axios
-- Tailwind CSS *(Frontend Coming Soon)*
+- Tailwind CSS *(Upcoming)*
+
+---
 
 ## Backend
 
@@ -65,20 +141,24 @@ An AI-powered Applicant Tracking System (ATS) built using the MERN Stack. HireFl
 - MongoDB Atlas
 - Mongoose
 
+---
+
 ## Authentication
 
 - JWT
 - bcrypt
 
+---
+
 ## File Handling
 
-- Multer *(Upcoming)*
-- Cloudinary *(Upcoming)*
-- pdf-parse *(Upcoming)*
+- Multer *(Phase 5)*
+- Cloudinary *(Phase 5)*
+- pdf-parse *(Phase 5)*
 
 ---
 
-# 📂 Project Structure
+# 📂 Folder Structure
 
 ```
 HireFlow-AI/
@@ -86,29 +166,33 @@ HireFlow-AI/
 │── client/
 
 │── server/
+
 │
 ├── config/
+
+├── constants/
+│     └── applicationStatus.js
+
 ├── controllers/
 │     ├── authController.js
-│     └── jobController.js
-│
+│     ├── jobController.js
+│     └── applicationController.js
+
 ├── middlewares/
-│     ├── authMiddleware.js
-│     ├── authorize.js
-│     └── errorHandler.js
-│
+
 ├── models/
 │     ├── User.js
-│     └── Job.js
-│
+│     ├── Job.js
+│     └── Application.js
+
 ├── routes/
-│     ├── authRoutes.js
-│     └── jobRoutes.js
-│
+
 ├── utils/
-│
+
 ├── app.js
+
 ├── server.js
+
 └── .env
 ```
 
@@ -140,56 +224,31 @@ Job
 
 ├── title
 ├── company
-├── location
 ├── description
-├── requirements
+├── location
 ├── salary
-├── employmentType
 ├── experience
-├── status
+├── employmentType
+├── requirements
 ├── recruiter
+├── status
 ├── createdAt
 └── updatedAt
 ```
 
 ---
 
-# 🔐 Authentication Flow
+## Applications
 
 ```
-Register
+Application
 
-↓
-
-Hash Password
-
-↓
-
-Store User
-
-↓
-
-Login
-
-↓
-
-Verify Password
-
-↓
-
-Generate JWT
-
-↓
-
-Authentication Middleware
-
-↓
-
-Authorization Middleware
-
-↓
-
-Protected Routes
+├── candidate
+├── job
+├── status
+├── resume
+├── createdAt
+└── updatedAt
 ```
 
 ---
@@ -198,31 +257,41 @@ Protected Routes
 
 ## Authentication
 
-| Method | Endpoint | Description |
-|----------|--------------------|---------------------------|
-| POST | /api/auth/register | Register User |
-| POST | /api/auth/login | Login User |
-| GET | /api/auth/me | Current Logged-in User |
-| GET | /api/auth/admin | Admin Route |
+| Method | Endpoint |
+|----------|---------------------|
+| POST | /api/auth/register |
+| POST | /api/auth/login |
+| GET | /api/auth/me |
+| GET | /api/auth/admin |
 
 ---
 
 ## Jobs
 
-| Method | Endpoint | Description |
-|----------|--------------------------|-----------------------------|
-| POST | /api/jobs | Create Job |
-| GET | /api/jobs | Get All Jobs |
-| GET | /api/jobs/:id | Get Single Job |
-| PATCH | /api/jobs/:id | Update Job |
-| DELETE | /api/jobs/:id | Delete Job |
-| GET | /api/jobs/dashboard/stats | Dashboard Statistics |
+| Method | Endpoint |
+|----------|----------------------------|
+| POST | /api/jobs |
+| GET | /api/jobs |
+| GET | /api/jobs/:id |
+| PATCH | /api/jobs/:id |
+| DELETE | /api/jobs/:id |
+| GET | /api/jobs/dashboard/stats |
 
 ---
 
-# 🔎 Search API
+## Applications
 
-Example
+| Method | Endpoint |
+|----------|--------------------------------------------|
+| POST | /api/applications/:jobId |
+| GET | /api/applications/my-applications |
+| GET | /api/applications/job/:jobId |
+| PATCH | /api/applications/:applicationId/status |
+| PATCH | /api/applications/:applicationId/withdraw |
+
+---
+
+# 🔍 Search
 
 ```
 GET /api/jobs?search=react
@@ -256,19 +325,13 @@ GET /api/jobs?page=1&limit=10
 
 # ↕ Sorting
 
-Latest
-
 ```
 GET /api/jobs?sort=latest
 ```
 
-Highest Salary
-
 ```
 GET /api/jobs?sort=salary_desc
 ```
-
-Lowest Salary
 
 ```
 GET /api/jobs?sort=salary_asc
@@ -276,7 +339,7 @@ GET /api/jobs?sort=salary_asc
 
 ---
 
-# 📊 Dashboard API
+# 📊 Dashboard
 
 ```
 GET /api/jobs/dashboard/stats
@@ -291,132 +354,51 @@ Returns
 
 ---
 
-# 🔑 Roles
-
-| Role | Permissions |
-|--------|----------------------------------------|
-| Candidate | View Jobs |
-| Recruiter | Manage Jobs |
-| Admin | Manage Everything |
-
----
-
-# 🛡 Security Features
+# 🔒 Security Features
 
 - JWT Authentication
 - Password Hashing
-- Protected Routes
 - Role-Based Authorization
 - Ownership Authorization
+- Duplicate Application Prevention
+- Closed Job Validation
+- Application State Machine
 - Global Error Handling
-- Standard API Responses
-
----
-
-# 🚀 Getting Started
-
-## Clone Repository
-
-```bash
-git clone https://github.com/Adarsh2059/HireFlow-AI.git
-```
-
-Move into the project
-
-```bash
-cd HireFlow-AI
-```
-
----
-
-## Backend
-
-```bash
-cd server
-npm install
-```
-
-Create `.env`
-
-```env
-PORT=5000
-
-MONGODB_URI=your_connection_string
-
-JWT_SECRET=your_secret
-
-JWT_EXPIRES_IN=7d
-```
-
-Run
-
-```bash
-npm run dev
-```
-
----
-
-## Frontend
-
-```bash
-cd client
-npm install
-npm run dev
-```
 
 ---
 
 # 📚 Concepts Implemented
 
 - Express Routing
-- Controllers
-- Middleware
+- MVC Architecture
+- REST APIs
 - MongoDB Relationships
 - Mongoose Populate
+- Nested Populate
 - JWT Authentication
 - Role-Based Authorization
-- Ownership Authorization
-- Search using Regex
+- State Machine
 - Query Parameters
+- Search
+- Filtering
 - Pagination
 - Sorting
-- Dashboard Statistics
-- REST APIs
+- Dashboard APIs
 
 ---
 
 # 🧪 API Testing
 
-Tested using Postman
-
-- Register
-- Login
-- Create Job
-- Get Jobs
-- Search Jobs
-- Filter Jobs
-- Pagination
-- Sorting
-- Update Job
-- Delete Job
-- Dashboard Statistics
+All APIs tested successfully using Postman.
 
 ---
 
 # 🚀 Upcoming Features
 
-## Phase 4
-
-- Candidate Applications
-- Prevent Duplicate Applications
-- Application Status
-- Recruiter Applicant Management
-
----
-
 ## Phase 5
 
 - Resume Upload
+- Resume Preview
 - Cloudinary Integration
 - PDF Parsing
 
@@ -434,9 +416,10 @@ Tested using Postman
 
 ## Phase 7
 
-- React Dashboard
+- React Frontend
 - Candidate Dashboard
 - Recruiter Dashboard
+- Admin Dashboard
 
 ---
 
@@ -453,8 +436,4 @@ Tested using Postman
 
 **Adarsh Yadav**
 
-GitHub: https://github.com/Adarsh2059
-
----
-
-⭐ If you like this project, consider giving it a star!
+GitHub: https://github.com/Adarsh2059/HireFlow-AI
