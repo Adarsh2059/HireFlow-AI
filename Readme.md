@@ -1,356 +1,266 @@
 # 🚀 HireFlow-AI
 
-An AI-powered Applicant Tracking System (ATS) built using the MERN Stack.
-
-HireFlow-AI helps recruiters streamline the hiring process by managing job postings, candidate applications, resume processing, and AI-powered resume screening.
-
-> **Current Progress:** ✅ Phase 4 Completed
+An AI-powered Resume Screening & Interview Platform built using the MERN Stack. HireFlow-AI streamlines the recruitment process by enabling recruiters to post jobs, candidates to apply with resumes, and preparing resumes for AI-powered analysis such as ATS scoring, skill extraction, and resume-job matching.
 
 ---
 
-# ✨ Features
+## ✨ Features
 
-## 🔐 Authentication & Authorization
-
+### Authentication
 - User Registration
 - User Login
 - JWT Authentication
-- Password Hashing using bcrypt
-- Current Logged-in User API
-- Protected Routes
-- Role-Based Authorization
-- Admin Authorization
+- Password Hashing with bcrypt
+- Role-Based Authorization (Candidate & Recruiter)
 
----
-
-# 👥 User Roles
-
-### Candidate
-
-- Browse Jobs
-- Search Jobs
-- Apply for Jobs
-- View Applied Jobs
-- Withdraw Applications
-
-### Recruiter
-
-- Create Jobs
-- Update Jobs
-- Delete Jobs
-- View Applicants
-- Update Application Status
-
-### Admin
-
-- Full Access
-- Manage Jobs
-- Manage Applications
-
----
-
-# 💼 Job Management
-
+### Job Management
 - Create Job
 - Update Job
 - Delete Job
-- View All Jobs
-- View Single Job
-
----
-
-# 🔎 Advanced Job APIs
-
-- Search by Title
-- Search by Company
-- Filter by Location
-- Filter by Experience
-- Filter by Employment Type
+- View Jobs
+- Search Jobs
+- Filter Jobs
 - Pagination
 - Sorting
 - Dashboard Statistics
 
----
-
-# 📄 Application Management
-
-### Candidate
-
-- Apply for Job
+### Application Management
+- Apply for Jobs
 - Prevent Duplicate Applications
 - View My Applications
-- Withdraw Application
-
-### Recruiter
-
-- View Applicants
+- Recruiter View Applicants
 - Update Application Status
+- Withdraw Application
+- Status Transition Validation
 
----
-
-# 🔄 Application Workflow
-
-```
-
-Applied
-
-↓
-
-Screening
-
-↓
-
-Shortlisted
-
-↓
-
-Interview
-
-↓
-
-Selected
-
-↓
-
-Hired
-
-```
-
-Candidates may withdraw before the hiring process is completed.
-
-Recruiters may reject candidates during any intermediate stage.
+### Resume Management
+- Upload Resume (PDF)
+- Resume Parsing using pdf-parse
+- Cloudinary Integration
+- Resume Storage
+- Resume Replacement
+- Resume Deletion
+- Resume Metadata Storage
+- Resume Text Extraction for AI
 
 ---
 
 # 🛠 Tech Stack
 
-## Frontend
-
-- React.js
-- Vite
-- React Router
-- Axios
-- Tailwind CSS *(Upcoming)*
-
----
-
 ## Backend
 
 - Node.js
 - Express.js
-- MongoDB Atlas
+- MongoDB
 - Mongoose
-
----
 
 ## Authentication
 
 - JWT
 - bcrypt
 
+## File Upload
+
+- Multer
+- Cloudinary
+- pdf-parse
+
+## Database
+
+- MongoDB Atlas
+
 ---
 
-## File Handling
-
-- Multer *(Phase 5)*
-- Cloudinary *(Phase 5)*
-- pdf-parse *(Phase 5)*
-
----
-
-# 📂 Folder Structure
+# 📂 Project Structure
 
 ```
-HireFlow-AI/
-
-│── client/
-
-│── server/
-
+server
 │
-├── config/
-
-├── constants/
-│     └── applicationStatus.js
-
-├── controllers/
-│     ├── authController.js
-│     ├── jobController.js
-│     └── applicationController.js
-
-├── middlewares/
-
-├── models/
-│     ├── User.js
-│     ├── Job.js
-│     └── Application.js
-
-├── routes/
-
-├── utils/
-
+├── config
+│   ├── db.js
+│   └── cloudinary.js
+│
+├── constants
+│   └── applicationStatus.js
+│
+├── controllers
+│   ├── authController.js
+│   ├── jobController.js
+│   ├── applicationController.js
+│   └── resumeController.js
+│
+├── middlewares
+│   ├── authMiddleware.js
+│   ├── upload.js
+│   └── errorHandler.js
+│
+├── models
+│   ├── User.js
+│   ├── Job.js
+│   └── Application.js
+│
+├── routes
+│   ├── authRoutes.js
+│   ├── jobRoutes.js
+│   ├── applicationRoutes.js
+│   └── resumeRoutes.js
+│
+├── utils
+│   ├── ApiError.js
+│   └── parseResume.js
+│
 ├── app.js
-
 ├── server.js
-
-└── .env
+└── package.json
 ```
 
 ---
 
-# 🗄 Database Collections
+# ⚙️ Installation
 
-## Users
+Clone the repository
 
-```
-User
-
-├── name
-├── email
-├── password
-├── role
-├── avatar
-├── isVerified
-├── createdAt
-└── updatedAt
+```bash
+git clone https://github.com/Adarsh2059/HireFlow-AI.git
 ```
 
----
+Move into the project
 
-## Jobs
-
+```bash
+cd HireFlow-AI/server
 ```
-Job
 
-├── title
-├── company
-├── description
-├── location
-├── salary
-├── experience
-├── employmentType
-├── requirements
-├── recruiter
-├── status
-├── createdAt
-└── updatedAt
+Install dependencies
+
+```bash
+npm install
 ```
 
 ---
 
-## Applications
+# 🔑 Environment Variables
 
-```
-Application
+Create a `.env` file inside the **server** folder.
 
-├── candidate
-├── job
-├── status
-├── resume
-├── createdAt
-└── updatedAt
+```env
+PORT=5000
+
+MONGODB_URI=your_mongodb_uri
+
+JWT_SECRET=your_jwt_secret
+
+JWT_EXPIRES_IN=7d
+
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+
+CLOUDINARY_API_KEY=your_api_key
+
+CLOUDINARY_API_SECRET=your_api_secret
+
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ---
 
-# 📡 API Endpoints
+# ▶️ Run the Project
+
+Development
+
+```bash
+npm run dev
+```
+
+Production
+
+```bash
+npm start
+```
+
+---
+
+# 📌 API Endpoints
 
 ## Authentication
 
-| Method | Endpoint |
-|----------|---------------------|
-| POST | /api/auth/register |
-| POST | /api/auth/login |
-| GET | /api/auth/me |
-| GET | /api/auth/admin |
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | /api/auth/register | Register User |
+| POST | /api/auth/login | Login User |
+| GET | /api/auth/profile | User Profile |
 
 ---
 
 ## Jobs
 
 | Method | Endpoint |
-|----------|----------------------------|
+|---------|----------|
 | POST | /api/jobs |
 | GET | /api/jobs |
 | GET | /api/jobs/:id |
 | PATCH | /api/jobs/:id |
 | DELETE | /api/jobs/:id |
-| GET | /api/jobs/dashboard/stats |
 
 ---
 
 ## Applications
 
 | Method | Endpoint |
-|----------|--------------------------------------------|
+|---------|----------|
 | POST | /api/applications/:jobId |
-| GET | /api/applications/my-applications |
+| GET | /api/applications/my |
 | GET | /api/applications/job/:jobId |
-| PATCH | /api/applications/:applicationId/status |
-| PATCH | /api/applications/:applicationId/withdraw |
+| PATCH | /api/applications/:applicationId |
+| DELETE | /api/applications/:applicationId |
 
 ---
 
-# 🔍 Search
+## Resume
 
-```
-GET /api/jobs?search=react
-```
-
----
-
-# 📍 Filters
-
-```
-GET /api/jobs?location=Remote
-```
-
-```
-GET /api/jobs?employmentType=Internship
-```
-
-```
-GET /api/jobs?experience=Fresher
-```
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | /api/resume/upload | Upload Resume |
+| GET | /api/resume | Get Resume |
+| DELETE | /api/resume | Delete Resume |
 
 ---
 
-# 📄 Pagination
+# 📄 Resume Upload Workflow
 
 ```
-GET /api/jobs?page=1&limit=10
+Candidate
+
+↓
+
+JWT Authentication
+
+↓
+
+Role Authorization
+
+↓
+
+Multer
+
+↓
+
+PDF Validation
+
+↓
+
+PDF Parsing
+
+↓
+
+Cloudinary Upload
+
+↓
+
+MongoDB Update
+
+↓
+
+Success Response
 ```
-
----
-
-# ↕ Sorting
-
-```
-GET /api/jobs?sort=latest
-```
-
-```
-GET /api/jobs?sort=salary_desc
-```
-
-```
-GET /api/jobs?sort=salary_asc
-```
-
----
-
-# 📊 Dashboard
-
-```
-GET /api/jobs/dashboard/stats
-```
-
-Returns
-
-- Total Jobs
-- Open Jobs
-- Closed Jobs
-- Recent Jobs
 
 ---
 
@@ -358,77 +268,42 @@ Returns
 
 - JWT Authentication
 - Password Hashing
-- Role-Based Authorization
-- Ownership Authorization
-- Duplicate Application Prevention
-- Closed Job Validation
-- Application State Machine
+- Role-Based Access Control
+- Protected Routes
+- File Type Validation
+- File Size Validation
 - Global Error Handling
-
----
-
-# 📚 Concepts Implemented
-
-- Express Routing
-- MVC Architecture
-- REST APIs
-- MongoDB Relationships
-- Mongoose Populate
-- Nested Populate
-- JWT Authentication
-- Role-Based Authorization
-- State Machine
-- Query Parameters
-- Search
-- Filtering
-- Pagination
-- Sorting
-- Dashboard APIs
-
----
-
-# 🧪 API Testing
-
-All APIs tested successfully using Postman.
 
 ---
 
 # 🚀 Upcoming Features
 
-## Phase 5
-
-- Resume Upload
-- Resume Preview
-- Cloudinary Integration
-- PDF Parsing
-
----
-
-## Phase 6
-
-- AI Resume Screening
-- ATS Score
-- Resume Ranking
-- Skill Gap Analysis
-- AI Interview Questions
+- AI Resume Analysis
+- ATS Score Calculation
+- Resume Summarization
+- Skill Extraction
+- Job-Resume Matching
+- AI Interview Question Generator
+- Recruiter Analytics Dashboard
+- Email Notifications
 
 ---
 
-## Phase 7
+# 📷 Screenshots
 
-- React Frontend
-- Candidate Dashboard
-- Recruiter Dashboard
-- Admin Dashboard
+_Add screenshots after frontend implementation._
 
 ---
 
-## Phase 8
+# 🤝 Contributing
 
-- Deployment
-- Docker
-- CI/CD
-- Production Security
+Contributions are welcome.
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit changes
+4. Push to your branch
+5. Open a Pull Request
 
 ---
 
@@ -436,4 +311,11 @@ All APIs tested successfully using Postman.
 
 **Adarsh Yadav**
 
-GitHub: https://github.com/Adarsh2059/HireFlow-AI
+- GitHub: https://github.com/Adarsh2059
+- LinkedIn: *(Add your LinkedIn URL)*
+
+---
+
+# ⭐ Support
+
+If you like this project, consider giving it a ⭐ on GitHub.

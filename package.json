@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "cloudinary": "^2.10.0",
+    "pdf-parse": "^1.1.1"
+  }
+}

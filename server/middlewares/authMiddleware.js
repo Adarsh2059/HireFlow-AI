@@ -4,46 +4,43 @@ import ApiError from "../utils/ApiError.js";
 
 const protect = async (req, res, next) => {
     try {
-
-        // Read Authorization Header
         const authHeader = req.headers.authorization;
 
-        // Check if token exists
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             throw new ApiError(401, "Not authorized. Token missing.");
         }
 
-        // Extract Token
         const token = authHeader.split(" ")[1];
 
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        console.log("Authorization Header:", authHeader);
-        console.log("Extracted Token:", token);
-
-
-
-
-        // Verify Token
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
-
-        // Find User
         const user = await User.findById(decoded.id).select("-password");
 
         if (!user) {
-            throw new ApiError(401, "User not found");
+            throw new ApiError(401, "User not found.");
         }
 
-        // Attach user to request
         req.user = user;
 
         next();
-
     } catch (error) {
         next(error);
     }
+};
+
+export const authorize = (...roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return next(
+                new ApiError(
+                    403,
+                    "You are not authorized to access this resource."
+                )
+            );
+        }
+
+        next();
+    };
 };
 
 export default protect;

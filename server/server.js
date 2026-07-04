@@ -1,4 +1,11 @@
+import path from "path";
 import dotenv from "dotenv";
+
+dotenv.config({
+    path: path.resolve(".env"),
+});
+
+console.log(process.env.CLOUDINARY_CLOUD_NAME);
 dotenv.config();
 
 import app from "./app.js";

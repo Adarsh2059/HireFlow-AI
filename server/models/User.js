@@ -37,10 +37,30 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    resumeUrl: {
+      type: String,
+      default: "",
+    },
+
+    resumePublicId: {
+      type: String,
+      default: "",
+    },
+
+    resumeText: {
+      type: String,
+      default: "",
+    },
+
+    resumeUploadedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const User = mongoose.model("User", userSchema);
