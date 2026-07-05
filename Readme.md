@@ -1,51 +1,265 @@
 # 🚀 HireFlow-AI
 
-An AI-powered Resume Screening & Interview Platform built using the MERN Stack. HireFlow-AI streamlines the recruitment process by enabling recruiters to post jobs, candidates to apply with resumes, and preparing resumes for AI-powered analysis such as ATS scoring, skill extraction, and resume-job matching.
+> **AI-Powered Resume Screening & Interview Platform (MERN + Gemini AI)**
+
+HireFlow-AI is a production-ready MERN-based recruitment platform that streamlines the hiring process using Artificial Intelligence. It enables recruiters to post jobs, manage applications, screen resumes with an ATS engine, and generate AI-powered resume insights and interview questions using Google Gemini.
 
 ---
 
-## ✨ Features
+# ✨ Features
 
-### Authentication
-- User Registration
-- User Login
+## 👤 Authentication & Authorization
+
 - JWT Authentication
-- Password Hashing with bcrypt
-- Role-Based Authorization (Candidate & Recruiter)
+- Password Hashing (bcrypt)
+- Role-based Access Control
+- Candidate
+- Recruiter
+- Admin
+- Protected Routes
+- Global Error Handling
 
-### Job Management
-- Create Job
-- Update Job
-- Delete Job
-- View Jobs
+---
+
+# 💼 Job Management
+
+Recruiters can
+
+- Create Jobs
+- Update Jobs
+- Delete Jobs
+- Close/Open Jobs
+
+Candidates can
+
+- Browse Jobs
 - Search Jobs
 - Filter Jobs
 - Pagination
 - Sorting
-- Dashboard Statistics
-
-### Application Management
-- Apply for Jobs
-- Prevent Duplicate Applications
-- View My Applications
-- Recruiter View Applicants
-- Update Application Status
-- Withdraw Application
-- Status Transition Validation
-
-### Resume Management
-- Upload Resume (PDF)
-- Resume Parsing using pdf-parse
-- Cloudinary Integration
-- Resume Storage
-- Resume Replacement
-- Resume Deletion
-- Resume Metadata Storage
-- Resume Text Extraction for AI
 
 ---
 
-# 🛠 Tech Stack
+# 📄 Resume Management
+
+Candidates can
+
+- Upload Resume (PDF)
+- Replace Resume
+- Delete Resume
+- View Uploaded Resume
+
+Backend automatically
+
+- Parses PDF
+- Cleans Resume Text
+- Uploads Resume to Cloudinary
+- Stores Resume Metadata
+- Stores Extracted Resume Text
+
+---
+
+# 📋 Application Management
+
+Candidates
+
+- Apply for Jobs
+- Prevent Duplicate Applications
+- Withdraw Applications
+- View My Applications
+
+Recruiters
+
+- View Applicants
+- Update Application Status
+- Track Hiring Pipeline
+
+---
+
+# 🔄 ATS Workflow
+
+Applications follow a controlled state machine.
+
+```
+Applied
+    │
+    ▼
+Screening
+    │
+    ▼
+Shortlisted
+    │
+    ▼
+Interview
+    │
+    ▼
+Selected
+    │
+    ▼
+Hired
+```
+
+Rejected can occur from any valid stage.
+
+Withdrawn is only allowed by the candidate.
+
+---
+
+# 🤖 AI Resume Analysis Engine
+
+HireFlow-AI includes a rule-based ATS engine that extracts and analyzes resumes before sending structured information to Gemini.
+
+## Resume Parsing
+
+- PDF Parsing
+- Resume Cleaning
+- Section Detection
+
+---
+
+## Resume Sections
+
+Automatically detects
+
+- Contact
+- Profile Summary
+- Skills
+- Education
+- Experience
+- Projects
+- Certifications
+- Achievements
+
+---
+
+## Resume Analysis
+
+Analyzes
+
+- Contact Information
+- Skills
+- Education
+- Experience
+- Projects
+
+Extracts
+
+- Technical Skills
+- Degree
+- Graduation Year
+- CGPA
+- Projects
+- Technologies Used
+
+---
+
+## ATS Engine
+
+Calculates
+
+- Resume Completeness
+- Skill Match
+- Resume vs Job Match
+- Missing Skills
+- ATS Score
+
+---
+
+## Resume Feedback
+
+Generates
+
+- Strengths
+- Weaknesses
+- Suggestions
+
+---
+
+# 🧠 Gemini AI Integration
+
+Gemini is **not** used for scoring resumes.
+
+Instead, HireFlow-AI first performs deterministic ATS analysis and then sends structured data to Gemini.
+
+This architecture ensures:
+
+- Consistent Results
+- Explainable ATS Score
+- Reduced Hallucinations
+- Production-Friendly AI Pipeline
+
+---
+
+## AI Resume Summary
+
+Generates
+
+- Professional Candidate Summary
+- Recruiter-friendly Overview
+
+---
+
+## AI Resume Review
+
+Provides
+
+- Overall Resume Rating
+- Strengths
+- Weaknesses
+- Suggestions
+
+---
+
+## AI Interview Question Generator
+
+Generates
+
+- Technical Questions
+- Project-Based Questions
+- Behavioral Questions
+- HR Questions
+
+Questions are personalized using
+
+- Resume
+- Skills
+- Projects
+- Job Description
+
+---
+
+# 🏗️ Architecture
+
+```
+                  Resume PDF
+                      │
+                      ▼
+               Resume Parser
+                      │
+                      ▼
+           Resume Text Extraction
+                      │
+                      ▼
+           Rule-Based ATS Engine
+          ┌───────────┴────────────┐
+          ▼                        ▼
+ Resume Analysis            Job Matching
+          │                        │
+          └───────────┬────────────┘
+                      ▼
+                ATS Score
+                      │
+                      ▼
+              Gemini AI Layer
+      ┌──────────┬─────────────┬──────────────┐
+      ▼          ▼             ▼
+ Resume      Resume      Interview
+ Summary      Review      Questions
+```
+
+---
+
+# 🛠️ Tech Stack
 
 ## Backend
 
@@ -54,40 +268,63 @@ An AI-powered Resume Screening & Interview Platform built using the MERN Stack. 
 - MongoDB
 - Mongoose
 
+---
+
 ## Authentication
 
 - JWT
 - bcrypt
 
+---
+
 ## File Upload
 
 - Multer
 - Cloudinary
-- pdf-parse
-
-## Database
-
-- MongoDB Atlas
 
 ---
 
-# 📂 Project Structure
+## Resume Parsing
+
+- pdf-parse
+
+---
+
+## AI
+
+- Google Gemini API
+- @google/genai
+
+---
+
+## Utilities
+
+- dotenv
+- cors
+- streamifier
+
+---
+
+# 📂 Folder Structure
 
 ```
 server
 │
 ├── config
 │   ├── db.js
-│   └── cloudinary.js
+│   ├── cloudinary.js
+│   └── gemini.js
 │
 ├── constants
-│   └── applicationStatus.js
+│   ├── applicationStatus.js
+│   └── skills.js
 │
 ├── controllers
 │   ├── authController.js
 │   ├── jobController.js
 │   ├── applicationController.js
-│   └── resumeController.js
+│   ├── resumeController.js
+│   └── atsController.js
 │
 ├── middlewares
 │   ├── authMiddleware.js
@@ -103,11 +340,18 @@ server
 │   ├── authRoutes.js
 │   ├── jobRoutes.js
 │   ├── applicationRoutes.js
-│   └── resumeRoutes.js
+│   ├── resumeRoutes.js
+│   └── atsRoutes.js
+│
+├── services
+│   └── geminiService.js
 │
 ├── utils
+│   ├── ats
+│   ├── parseResume.js
 │   ├── ApiError.js
-│   └── parseResume.js
+│   ├── ApiResponse.js
+│   └── ...
 │
 ├── app.js
 ├── server.js
@@ -116,76 +360,14 @@ server
 
 ---
 
-# ⚙️ Installation
-
-Clone the repository
-
-```bash
-git clone https://github.com/Adarsh2059/HireFlow-AI.git
-```
-
-Move into the project
-
-```bash
-cd HireFlow-AI/server
-```
-
-Install dependencies
-
-```bash
-npm install
-```
-
----
-
-# 🔑 Environment Variables
-
-Create a `.env` file inside the **server** folder.
-
-```env
-PORT=5000
-
-MONGODB_URI=your_mongodb_uri
-
-JWT_SECRET=your_jwt_secret
-
-JWT_EXPIRES_IN=7d
-
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-
-CLOUDINARY_API_KEY=your_api_key
-
-CLOUDINARY_API_SECRET=your_api_secret
-
-GEMINI_API_KEY=your_gemini_api_key
-```
-
----
-
-# ▶️ Run the Project
-
-Development
-
-```bash
-npm run dev
-```
-
-Production
-
-```bash
-npm start
-```
-
----
-
-# 📌 API Endpoints
+# 📡 API Endpoints
 
 ## Authentication
 
 | Method | Endpoint | Description |
-|---------|----------|-------------|
+|----------|---------------------------|----------------|
 | POST | /api/auth/register | Register User |
-| POST | /api/auth/login | Login User |
+| POST | /api/auth/login | Login |
 | GET | /api/auth/profile | User Profile |
 
 ---
@@ -193,11 +375,11 @@ npm start
 ## Jobs
 
 | Method | Endpoint |
-|---------|----------|
+|----------|-------------------------|
 | POST | /api/jobs |
 | GET | /api/jobs |
 | GET | /api/jobs/:id |
-| PATCH | /api/jobs/:id |
+| PUT | /api/jobs/:id |
 | DELETE | /api/jobs/:id |
 
 ---
@@ -205,105 +387,187 @@ npm start
 ## Applications
 
 | Method | Endpoint |
-|---------|----------|
-| POST | /api/applications/:jobId |
+|----------|-------------------------------------------|
+| POST | /api/applications/apply/:jobId |
 | GET | /api/applications/my |
 | GET | /api/applications/job/:jobId |
-| PATCH | /api/applications/:applicationId |
-| DELETE | /api/applications/:applicationId |
+| PUT | /api/applications/status/:applicationId |
+| PUT | /api/applications/withdraw/:applicationId |
 
 ---
 
 ## Resume
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | /api/resume/upload | Upload Resume |
-| GET | /api/resume | Get Resume |
-| DELETE | /api/resume | Delete Resume |
+| Method | Endpoint |
+|----------|---------------------------|
+| POST | /api/resume/upload |
+| GET | /api/resume |
+| DELETE | /api/resume |
 
 ---
 
-# 📄 Resume Upload Workflow
+## ATS
+
+| Method | Endpoint |
+|----------|--------------------------------|
+| POST | /api/ats/analyze/:jobId |
+
+Returns
+
+- Resume Analysis
+- ATS Score
+- Resume Review
+- Job Match
+- AI Resume Summary
+- AI Interview Questions
+
+---
+
+# ⚙️ Environment Variables
 
 ```
-Candidate
+PORT=
 
-↓
+MONGODB_URI=
 
-JWT Authentication
+JWT_SECRET=
 
-↓
+CLOUDINARY_CLOUD_NAME=
 
-Role Authorization
+CLOUDINARY_API_KEY=
 
-↓
+CLOUDINARY_API_SECRET=
 
-Multer
-
-↓
-
-PDF Validation
-
-↓
-
-PDF Parsing
-
-↓
-
-Cloudinary Upload
-
-↓
-
-MongoDB Update
-
-↓
-
-Success Response
+GEMINI_API_KEY=
 ```
 
 ---
 
-# 🔒 Security Features
+# 🚀 Installation
 
-- JWT Authentication
-- Password Hashing
-- Role-Based Access Control
-- Protected Routes
-- File Type Validation
-- File Size Validation
-- Global Error Handling
+Clone Repository
+
+```bash
+git clone https://github.com/yourusername/HireFlow-AI.git
+```
+
+Install Dependencies
+
+```bash
+npm install
+```
+
+Start Server
+
+```bash
+npm run dev
+```
 
 ---
 
-# 🚀 Upcoming Features
+# ✅ Completed Phases
 
-- AI Resume Analysis
-- ATS Score Calculation
-- Resume Summarization
+## Phase 1
+
+Backend Setup
+
+- Express
+- MongoDB
+- Error Handling
+
+---
+
+## Phase 2
+
+Authentication
+
+- JWT
+- bcrypt
+- Role-based Access
+
+---
+
+## Phase 3
+
+Jobs
+
+- CRUD
+- Search
+- Filters
+- Pagination
+
+---
+
+## Phase 4
+
+Applications
+
+- Apply
+- Withdraw
+- Recruiter Workflow
+- ATS State Machine
+
+---
+
+## Phase 5
+
+Resume Module
+
+- Cloudinary Upload
+- PDF Parsing
+- Resume Storage
+- Resume Retrieval
+
+---
+
+## Phase 6
+
+AI Engine
+
+### Rule-Based ATS
+
+- Resume Parsing
+- Section Extraction
 - Skill Extraction
-- Job-Resume Matching
-- AI Interview Question Generator
-- Recruiter Analytics Dashboard
+- ATS Score
+- Resume Feedback
+- Resume vs Job Matching
+
+### Gemini AI
+
+- Resume Summary
+- Resume Review
+- Interview Question Generation
+
+---
+
+# 📈 Current Status
+
+| Module | Status |
+|----------|--------|
+| Backend | ✅ Complete |
+| Authentication | ✅ Complete |
+| Jobs | ✅ Complete |
+| Applications | ✅ Complete |
+| Resume Module | ✅ Complete |
+| ATS Engine | ✅ Complete |
+| Gemini AI | ✅ Complete |
+| Frontend | 🚧 In Progress |
+| Deployment | ⏳ Pending |
+
+---
+
+# 🔮 Future Enhancements
+
+- React Frontend
+- Recruiter Dashboard
+- Candidate Dashboard
+- Analytics Dashboard
 - Email Notifications
-
----
-
-# 📷 Screenshots
-
-_Add screenshots after frontend implementation._
-
----
-
-# 🤝 Contributing
-
-Contributions are welcome.
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit changes
-4. Push to your branch
-5. Open a Pull Request
+- Interview Scheduling
+- Deployment (Render + Vercel)
+- Docker Support
+- CI/CD Pipeline
 
 ---
 
@@ -311,11 +575,19 @@ Contributions are welcome.
 
 **Adarsh Yadav**
 
-- GitHub: https://github.com/Adarsh2059
-- LinkedIn: *(Add your LinkedIn URL)*
+Computer Science Engineering Student
+
+VIT Bhopal University
 
 ---
 
-# ⭐ Support
+# ⭐ Project Highlights
 
-If you like this project, consider giving it a ⭐ on GitHub.
+- Production-ready MERN Architecture
+- AI-powered Resume Screening
+- Rule-Based ATS Engine
+- Google Gemini Integration
+- Resume Parsing Pipeline
+- Recruiter Workflow Management
+- Interview Question Generation
+- Modular & Scalable Backend Design
