@@ -1,20 +1,7 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <div className="min-h-screen bg-blue-600 flex items-center justify-center">
-      <h1 className="text-5xl text-white font-bold">
-        HireFlow AI
-      </h1>
-    </div>
-
-  )
+  return <AppRoutes />;
 }
 
-export default App
+export default App;
