@@ -27,11 +27,15 @@ export const matchResumeToJob = (
 
     extraSkills:
       resumeSkills.filter(
-        skill =>
-          !jobSkills.includes(skill)
+        skill => !jobSkills.includes(skill)
       ),
 
+    // Existing field
     matchPercentage:
+      skillMatch.matchPercentage,
+
+    // New field (for frontend compatibility)
+    atsScore:
       skillMatch.matchPercentage,
 
   };

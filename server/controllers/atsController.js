@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import Job from "../models/Job.js";
+import ATSReport from "../models/ATSReport.js";
 
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
@@ -9,22 +10,30 @@ import {
   matchResumeToJob,
 } from "../utils/ats/index.js";
 
-export const analyzeResumeForJob = async (
+import {
+  generateATSReport,
+} from "../services/geminiService.js";
+
+// =====================================
+// Generate ATS Report (ONLY ONCE)
+// =====================================
+
+export const generateATS = async (
   req,
   res,
   next
 ) => {
   try {
-
     const { jobId } = req.params;
 
-    const candidate =
-      await User.findById(req.user._id);
+    const candidate = await User.findById(
+      req.user._id
+    );
 
     if (!candidate) {
       throw new ApiError(
         404,
-        "Candidate not found"
+        "Candidate not found."
       );
     }
 
@@ -35,23 +44,39 @@ export const analyzeResumeForJob = async (
       );
     }
 
-    const job =
-      await Job.findById(jobId);
+    const job = await Job.findById(jobId);
 
     if (!job) {
       throw new ApiError(
         404,
-        "Job not found"
+        "Job not found."
       );
     }
 
-    // Resume Analysis
-    const analysis =
-      analyzeResume(
-        candidate.resumeText
-      );
+    // Check Cache
 
-    // Job Match
+    const existingReport =
+      await ATSReport.findOne({
+        candidate: candidate._id,
+        job: job._id,
+      });
+
+    if (existingReport) {
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          "ATS report already exists.",
+          existingReport
+        )
+      );
+    }
+
+    // Local Analysis
+
+    const analysis = analyzeResume(
+      candidate.resumeText
+    );
+
     const jobMatch =
       matchResumeToJob(
         analysis.skills,
@@ -62,13 +87,146 @@ ${job.description}
 ${job.requirements.join("\n")}`
       );
 
+    // AI
+
+    const aiReport =
+      await generateATSReport({
+        analysis,
+        jobMatch,
+        jobDescription: `${job.title}
+
+${job.description}
+
+${job.requirements.join("\n")}`,
+      });
+
+    // Save
+
+    const report =
+      await ATSReport.create({
+        candidate: candidate._id,
+
+        job: job._id,
+
+        analysis,
+
+        jobMatch,
+
+        summary: aiReport.summary,
+
+        review: aiReport.review,
+
+        interviewQuestions:
+          aiReport.interviewQuestions,
+
+        status: "completed",
+
+        lastGeneratedAt: new Date(),
+      });
+
+    return res.status(201).json(
+      new ApiResponse(
+        201,
+        "ATS Report generated successfully.",
+        report
+      )
+    );
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+// =====================================
+// Get Cached Report
+// =====================================
+
+export const getATSReport = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { jobId } = req.params;
+
+    const report =
+      await ATSReport.findOne({
+        candidate: req.user._id,
+        job: jobId,
+      });
+
+    if (!report) {
+      throw new ApiError(
+        404,
+        "ATS report not found."
+      );
+    }
+
     return res.status(200).json(
       new ApiResponse(
         200,
-        "Resume analyzed successfully",
+        "ATS report fetched successfully.",
+        report
+      )
+    );
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+// =====================================
+// Re Analyze
+// =====================================
+
+export const reAnalyzeATS = async (
+  req,
+  res,
+  next
+) => {
+  try {
+
+    const { jobId } = req.params;
+
+    await ATSReport.findOneAndDelete({
+      candidate: req.user._id,
+      job: jobId,
+    });
+
+    return generateATS(
+      req,
+      res,
+      next
+    );
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getATSStatus = async (
+  req,
+  res,
+  next
+) => {
+  try {
+
+    const { jobId } = req.params;
+
+    const report =
+      await ATSReport.findOne({
+        candidate: req.user._id,
+        job: jobId,
+      }).select("lastGeneratedAt");
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        "ATS status fetched successfully.",
         {
-          analysis,
-          jobMatch,
+          exists: Boolean(report),
+          lastGeneratedAt:
+            report?.lastGeneratedAt || null,
         }
       )
     );

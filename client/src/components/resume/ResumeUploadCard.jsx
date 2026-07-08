@@ -5,7 +5,9 @@ import toast from "react-hot-toast";
 
 import { uploadResume } from "../../services/resumeService";
 
-function ResumeUploadCard() {
+function ResumeUploadCard({
+  refreshUser,
+}) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -21,9 +23,10 @@ function ResumeUploadCard() {
         const percent = Math.round(
           (event.loaded * 100) / event.total
         );
-
         setProgress(percent);
       });
+      
+      await refreshUser();
 
       toast.success("Resume uploaded successfully");
     } catch (error) {

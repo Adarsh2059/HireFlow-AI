@@ -1,6 +1,7 @@
 import Job from "../models/Job.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
+import Application from "../models/Application.js";
 
 export const createJob = async (req, res, next) => {
     try {
@@ -138,7 +139,7 @@ switch (sort) {
 
         const jobs = await Job.find(filter)
             .populate("recruiter", "name email")
-            .sort({ sortOption })
+            .sort(sortOption)
             .skip(skip)
             .limit(limitNumber);
 
@@ -161,6 +162,32 @@ switch (sort) {
     } catch (error) {
         next(error);
     }
+};
+
+export const getRecruiterJobs = async (
+  req,
+  res,
+  next
+) => {
+  try {
+
+    const jobs = await Job.find({
+      recruiter: req.user._id,
+    }).sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        "Recruiter jobs fetched successfully",
+        jobs
+      )
+    );
+
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const getJobById = async (req, res, next) => {
@@ -267,53 +294,69 @@ export const deleteJob = async (req, res, next) => {
 };
 
 export const getDashboardStats = async (req, res, next) => {
-    try {
+  try {
+    const recruiterId = req.user._id;
 
-        const recruiterId = req.user._id;
+    const [
+      totalJobs,
+      openJobs,
+      closedJobs,
+      totalApplications,
+      shortlisted,
+      hired,
+      recentJobs,
+    ] = await Promise.all([
+      Job.countDocuments({
+        recruiter: recruiterId,
+      }),
 
-        const [
-            totalJobs,
-            openJobs,
-            closedJobs,
-            recentJobs,
-        ] = await Promise.all([
+      Job.countDocuments({
+        recruiter: recruiterId,
+        status: "Open",
+      }),
 
-            Job.countDocuments({
-                recruiter: recruiterId,
-            }),
+      Job.countDocuments({
+        recruiter: recruiterId,
+        status: "Closed",
+      }),
 
-            Job.countDocuments({
-                recruiter: recruiterId,
-                status: "Open",
-            }),
+      Application.countDocuments({
+        recruiter: recruiterId,
+      }),
 
-            Job.countDocuments({
-                recruiter: recruiterId,
-                status: "Closed",
-            }),
+      Application.countDocuments({
+        recruiter: recruiterId,
+        status: "Shortlisted",
+      }),
 
-            Job.find({
-                recruiter: recruiterId,
-            })
-                .sort({ createdAt: -1 })
-                .limit(5)
+      Application.countDocuments({
+        recruiter: recruiterId,
+        status: "Hired",
+      }),
 
-        ]);
+      Job.find({
+        recruiter: recruiterId,
+      })
+        .sort({ createdAt: -1 })
+        .limit(5),
+    ]);
 
-        res.status(200).json(
-            new ApiResponse(
-                200,
-                "Dashboard fetched successfully",
-                {
-                    totalJobs,
-                    openJobs,
-                    closedJobs,
-                    recentJobs,
-                }
-            )
-        );
-
-    } catch (error) {
-        next(error);
-    }
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        "Dashboard fetched successfully",
+        {
+          totalJobs,
+          openJobs,
+          closedJobs,
+          totalApplications,
+          shortlisted,
+          hired,
+          recentJobs,
+        }
+      )
+    );
+  } catch (error) {
+    next(error);
+  }
 };

@@ -19,3 +19,15 @@ export const uploadResume = async (file, onUploadProgress) => {
 
   return response.data;
 };
+
+export const getCurrentUser = async () => {
+  const response = await api.get("/auth/me");
+
+  return response.data;
+};
+
+export const deleteResume = async () => {
+  const response = await api.delete("/resume");
+
+  return response.data;
+};

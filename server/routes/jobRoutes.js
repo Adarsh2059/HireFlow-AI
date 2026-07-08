@@ -1,6 +1,14 @@
 import express from "express";
 
-import { createJob,getAllJobs,getJobById,patchJob,deleteJob,getDashboardStats } from "../controllers/jobController.js";
+import {
+  createJob,
+  getAllJobs,
+  getJobById,
+  patchJob,
+  deleteJob,
+  getDashboardStats,
+  getRecruiterJobs,
+} from "../controllers/jobController.js";
 
 import protect from "../middlewares/authMiddleware.js";
 import authorize from "../middlewares/authorize.js";
@@ -15,6 +23,13 @@ router.get(
 );
 
 router.get("/", getAllJobs);
+
+router.get(
+  "/my-jobs",
+  protect,
+  authorize("recruiter", "admin"),
+  getRecruiterJobs
+);
 
 router.get("/:id", getJobById);
 
