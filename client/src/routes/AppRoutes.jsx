@@ -10,18 +10,23 @@ import Jobs from "../pages/jobs/Jobs";
 import JobDetails from "../pages/jobs/JobDetails";
 import MyApplications from "../pages/applications/MyApplications";
 import ATSReport from "../pages/ats/ATSReport";
+import RecruiterDashboard from "../pages/recruiter/RecruiterDashboard";
+import MyJobs from "../pages/recruiter/MyJobs";
+import RoleRedirect from "../components/auth/RoleRedirect";
 
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<RoleRedirect />} />
+
       <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <CandidateDashboard />
-          </ProtectedRoute>
-        }
-      />
+  path="/candidate/dashboard"
+  element={
+    <ProtectedRoute allowedRoles={["candidate"]}>
+      <CandidateDashboard />
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/login"
@@ -85,6 +90,24 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+  path="/recruiter/dashboard"
+  element={
+    <ProtectedRoute allowedRoles={["recruiter"]}>
+      <RecruiterDashboard />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/recruiter/jobs"
+  element={
+    <ProtectedRoute>
+      <MyJobs />
+    </ProtectedRoute>
+  }
+/>
 
       <Route path="*" element={<h1>404 Page Not Found</h1>} />
     </Routes>

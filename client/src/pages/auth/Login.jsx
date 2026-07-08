@@ -6,7 +6,7 @@ import { loginSchema } from "../../validation/authSchema";
 import toast from "react-hot-toast";
 import { loginUser } from "../../services/authService";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function Login() {
   const {
@@ -27,18 +27,17 @@ function Login() {
   try {
     const response = await loginUser(formData);
 
-    login(
-      response.data.user,
-      response.data.token
-    );
+    const user = response.data.user;
+
+    login(user, response.data.token);
 
     toast.success(response.message);
 
     navigate("/");
+
   } catch (error) {
     toast.error(
-      error.response?.data?.message ||
-        "Login Failed"
+      error.response?.data?.message || "Login Failed"
     );
   }
 };
@@ -94,9 +93,9 @@ function Login() {
 
         <p className="mt-6 text-center text-sm text-slate-500">
           Don't have an account?{" "}
-          <span className="text-blue-600 cursor-pointer hover:underline">
+          <Link to="/register" className="text-blue-600 hover:underline">
             Register
-          </span>
+          </Link>
         </p>
       </div>
     </div>

@@ -40,6 +40,11 @@ export const registerSchema = z
     confirmPassword: z
       .string()
       .min(1, "Please confirm your password"),
+
+    role: z.enum([
+      "candidate",
+      "recruiter",
+    ]),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],

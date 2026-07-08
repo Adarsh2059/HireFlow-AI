@@ -50,19 +50,28 @@ export const generateATSReport = async ({
 
   // Reduce prompt size before sending to Gemini
   const candidate = {
-    skills: analysis.skills,
-    education: analysis.education,
-    experience: analysis.experience,
-    projects: analysis.projects?.map(
-      (project) => project.name || project
-    ),
-  };
+  skills: analysis.skills,
+
+  education: analysis.education,
+
+  experience: analysis.experience,
+
+  totalProjects:
+    analysis.projects?.totalProjects || 0,
+
+  strongestProject:
+    analysis.projects?.strongestProject?.title ||
+    analysis.projects?.strongestProject?.name ||
+    "N/A",
+};
 
   const ats = {
-    score: jobMatch.atsScore,
-    matchedSkills: jobMatch.matchedSkills,
-    missingSkills: jobMatch.missingSkills,
-  };
+  score: jobMatch.matchPercentage,
+
+  matchedSkills: jobMatch.matchedSkills,
+
+  missingSkills: jobMatch.missingSkills,
+};
 
   const prompt = `
 You are an experienced Senior Technical Recruiter and ATS Expert.
