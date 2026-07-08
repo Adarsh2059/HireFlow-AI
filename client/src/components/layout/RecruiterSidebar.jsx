@@ -1,17 +1,14 @@
 import {
   LayoutDashboard,
-  FileText,
   BriefcaseBusiness,
-  ClipboardList,
-  Sparkles,
-  MessageSquare,
+  PlusCircle,
   LogOut,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-function Sidebar() {
+function RecruiterSidebar() {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const handleLogout = () => {
@@ -22,25 +19,19 @@ function Sidebar() {
   const menu = [
     {
       name: "Dashboard",
-      path: "/",
+      path: "/recruiter/dashboard",
       icon: LayoutDashboard,
     },
     {
-      name: "Resume",
-      path: "/resume",
-      icon: FileText,
-    },
-    {
-      name: "Jobs",
-      path: "/jobs",
+      name: "My Jobs",
+      path: "/recruiter/jobs",
       icon: BriefcaseBusiness,
     },
     {
-      name: "Applications",
-      path: "/applications",
-      icon: ClipboardList,
+      name: "Create Job",
+      path: "/recruiter/jobs/create",
+      icon: PlusCircle,
     },
-    
   ];
 
   return (
@@ -82,4 +73,4 @@ function Sidebar() {
   );
 }
 
-export default Sidebar;
+export default RecruiterSidebar;

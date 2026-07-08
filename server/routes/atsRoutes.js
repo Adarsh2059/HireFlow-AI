@@ -17,7 +17,7 @@ const router = express.Router();
 router.post(
   "/analyze/:jobId",
   protect,
-  authorize("candidate"),
+  authorize("candidate", "recruiter", "admin"),
   generateATS
 );
 
@@ -25,7 +25,7 @@ router.post(
 router.get(
   "/report/:jobId",
   protect,
-  authorize("candidate"),
+  authorize("candidate", "recruiter", "admin"),
   getATSReport
 );
 
@@ -33,7 +33,7 @@ router.get(
 router.get(
   "/status/:jobId",
   protect,
-  authorize("candidate"),
+  authorize("candidate", "recruiter", "admin"),
   getATSStatus
 );
 
@@ -41,7 +41,7 @@ router.get(
 router.post(
   "/reanalyze/:jobId",
   protect,
-  authorize("candidate"),
+  authorize("candidate", "recruiter", "admin"),
   reAnalyzeATS
 );
 

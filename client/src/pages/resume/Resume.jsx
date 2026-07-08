@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import DashboardLayout from "../../layouts/DashboardLayout";
+import CandidateLayout from "../../layouts/CandidateLayout";
 
 import ResumeUploadCard from "../../components/resume/ResumeUploadCard";
 import ResumeInfoCard from "../../components/resume/ResumeInfoCard";
@@ -27,7 +27,7 @@ function Resume() {
   }, []);
 
   return (
-    <DashboardLayout>
+    <CandidateLayout>
 
       <div className="space-y-8">
 
@@ -56,7 +56,7 @@ function Resume() {
 
       </div>
 
-    </DashboardLayout>
+    </CandidateLayout>
   );
 }
 

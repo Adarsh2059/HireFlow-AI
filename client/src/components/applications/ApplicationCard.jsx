@@ -18,6 +18,20 @@ function ApplicationCard({ application, refreshApplications }) {
     }
   };
 
+  if (!application.job) {
+  return (
+    <div className="rounded-xl border border-red-200 bg-red-50 p-6">
+      <h2 className="font-semibold text-red-700">
+        Job No Longer Available
+      </h2>
+
+      <p className="mt-2 text-sm text-red-600">
+        This job has been removed by the recruiter.
+      </p>
+    </div>
+  );
+}
+
   return (
     <div className="rounded-xl border bg-white p-6 shadow-sm">
 

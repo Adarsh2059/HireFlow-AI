@@ -25,9 +25,18 @@ export const generateATS = async (
 ) => {
   try {
     const { jobId } = req.params;
+    const { candidateId } = req.query;
+
+    let candidateQueryId = req.user._id;
+    if (
+      (req.user.role === "recruiter" || req.user.role === "admin") &&
+      candidateId
+    ) {
+      candidateQueryId = candidateId;
+    }
 
     const candidate = await User.findById(
-      req.user._id
+      candidateQueryId
     );
 
     if (!candidate) {
@@ -148,10 +157,19 @@ export const getATSReport = async (
 ) => {
   try {
     const { jobId } = req.params;
+    const { candidateId } = req.query;
+
+    let candidateQueryId = req.user._id;
+    if (
+      (req.user.role === "recruiter" || req.user.role === "admin") &&
+      candidateId
+    ) {
+      candidateQueryId = candidateId;
+    }
 
     const report =
       await ATSReport.findOne({
-        candidate: req.user._id,
+        candidate: candidateQueryId,
         job: jobId,
       });
 
@@ -187,9 +205,18 @@ export const reAnalyzeATS = async (
   try {
 
     const { jobId } = req.params;
+    const { candidateId } = req.query;
+
+    let candidateQueryId = req.user._id;
+    if (
+      (req.user.role === "recruiter" || req.user.role === "admin") &&
+      candidateId
+    ) {
+      candidateQueryId = candidateId;
+    }
 
     await ATSReport.findOneAndDelete({
-      candidate: req.user._id,
+      candidate: candidateQueryId,
       job: jobId,
     });
 
@@ -212,10 +239,19 @@ export const getATSStatus = async (
   try {
 
     const { jobId } = req.params;
+    const { candidateId } = req.query;
+
+    let candidateQueryId = req.user._id;
+    if (
+      (req.user.role === "recruiter" || req.user.role === "admin") &&
+      candidateId
+    ) {
+      candidateQueryId = candidateId;
+    }
 
     const report =
       await ATSReport.findOne({
-        candidate: req.user._id,
+        candidate: candidateQueryId,
         job: jobId,
       }).select("lastGeneratedAt");
 

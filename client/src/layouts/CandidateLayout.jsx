@@ -1,7 +1,7 @@
-import Sidebar from "../components/dashboard/Sidebar";
+import CandidateSidebar from "../components/layout/CandidateSidebar";
 import Navbar from "../components/dashboard/Navbar";
 
-function DashboardLayout({ children }) {
+function CandidateLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-slate-100">
 
@@ -21,4 +21,4 @@ function DashboardLayout({ children }) {
   );
 }
 
-export default DashboardLayout;
+export default CandidateLayout;

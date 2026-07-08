@@ -3,15 +3,13 @@ import {
   FileText,
   BriefcaseBusiness,
   ClipboardList,
-  Sparkles,
-  MessageSquare,
   LogOut,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-function Sidebar() {
+function CandidateSidebar() {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const handleLogout = () => {
@@ -22,7 +20,7 @@ function Sidebar() {
   const menu = [
     {
       name: "Dashboard",
-      path: "/",
+      path: "/candidate/dashboard",
       icon: LayoutDashboard,
     },
     {
@@ -40,7 +38,6 @@ function Sidebar() {
       path: "/applications",
       icon: ClipboardList,
     },
-    
   ];
 
   return (
@@ -82,4 +79,4 @@ function Sidebar() {
   );
 }
 
-export default Sidebar;
+export default CandidateSidebar;

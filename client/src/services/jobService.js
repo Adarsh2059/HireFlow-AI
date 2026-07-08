@@ -15,3 +15,11 @@ export const getJobById = async (id) => {
 
   return response.data;
 };
+
+export const getRecruiterJobById =
+  async (id) => {
+    const response =
+      await api.get(`/jobs/${id}`);
+
+    return response.data;
+  };

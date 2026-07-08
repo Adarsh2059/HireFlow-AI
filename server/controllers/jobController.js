@@ -2,6 +2,7 @@ import Job from "../models/Job.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import Application from "../models/Application.js";
+import ATSReport from "../models/ATSReport.js"
 
 export const createJob = async (req, res, next) => {
     try {
@@ -278,7 +279,18 @@ export const deleteJob = async (req, res, next) => {
             );
         }
 
-        await Job.findByIdAndDelete(id);
+        // Delete all applications
+await Application.deleteMany({
+    job: id,
+});
+
+// Delete ATS reports
+await ATSReport.deleteMany({
+    job: id,
+});
+
+// Delete job
+await Job.findByIdAndDelete(id);
 
         res.status(200).json(
             new ApiResponse(
@@ -341,6 +353,16 @@ export const getDashboardStats = async (req, res, next) => {
         .limit(5),
     ]);
 
+    const recentJobsWithCount = await Promise.all(
+      recentJobs.map(async (job) => {
+        const applicantCount = await Application.countDocuments({ job: job._id });
+        return {
+          ...job.toObject(),
+          applicantCount,
+        };
+      })
+    );
+
     res.status(200).json(
       new ApiResponse(
         200,
@@ -352,7 +374,7 @@ export const getDashboardStats = async (req, res, next) => {
           totalApplications,
           shortlisted,
           hired,
-          recentJobs,
+          recentJobs: recentJobsWithCount,
         }
       )
     );

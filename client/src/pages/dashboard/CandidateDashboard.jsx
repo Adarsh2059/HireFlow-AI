@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import DashboardLayout from "../../layouts/DashboardLayout";
+import CandidateLayout from "../../layouts/CandidateLayout";
 import { getCandidateDashboard } from "../../services/dashboardService";
 
 function CandidateDashboard() {
@@ -37,7 +37,7 @@ function CandidateDashboard() {
 };
 
   return (
-    <DashboardLayout>
+    <CandidateLayout>
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">
@@ -76,7 +76,7 @@ function CandidateDashboard() {
           </p>
         </div>
       </div>
-    </DashboardLayout>
+    </CandidateLayout>
   );
 }
 

@@ -71,10 +71,19 @@ export const getMyApplications = async (req, res, next) => {
         createdAt: -1,
       });
 
+    // Remove orphan applications whose job has been deleted
+    const validApplications = applications.filter(
+      (application) => application.job,
+    );
+
     res
       .status(200)
       .json(
-        new ApiResponse(200, "Applications fetched successfully", applications),
+        new ApiResponse(
+          200,
+          "Applications fetched successfully",
+          validApplications,
+        ),
       );
   } catch (error) {
     next(error);
@@ -103,7 +112,8 @@ export const getApplicantsForJob = async (req, res, next) => {
     const applications = await Application.find({
       job: jobId,
     })
-      .populate("candidate", "name email avatar createdAt")
+      .populate("candidate", "name email avatar createdAt resumeUrl")
+      .populate("job", "_id title")
       .sort({
         createdAt: -1,
       });
@@ -124,9 +134,8 @@ export const updateApplicationStatus = async (req, res, next) => {
     const { status } = req.body;
 
     // Find Application
-    const application = await Application.findById(applicationId).populate(
-      "job",
-    );
+    const application =
+      await Application.findById(applicationId).populate("job");
 
     if (!application) {
       throw new ApiError(404, "Application not found");
@@ -137,10 +146,7 @@ export const updateApplicationStatus = async (req, res, next) => {
       req.user.role !== "admin" &&
       application.job.recruiter.toString() !== req.user._id.toString()
     ) {
-      throw new ApiError(
-        403,
-        "You can update only your own applicants",
-      );
+      throw new ApiError(403, "You can update only your own applicants");
     }
 
     // Current Status
@@ -155,9 +161,7 @@ export const updateApplicationStatus = async (req, res, next) => {
     }
 
     // Validate Transition
-    if (
-      !ALLOWED_STATUS_TRANSITIONS[currentStatus].includes(status)
-    ) {
+    if (!ALLOWED_STATUS_TRANSITIONS[currentStatus].includes(status)) {
       throw new ApiError(
         400,
         `Cannot change status from ${currentStatus} to ${status}`,
@@ -169,13 +173,15 @@ export const updateApplicationStatus = async (req, res, next) => {
 
     await application.save();
 
-    res.status(200).json(
-      new ApiResponse(
-        200,
-        "Application status updated successfully",
-        application,
-      ),
-    );
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          "Application status updated successfully",
+          application,
+        ),
+      );
   } catch (error) {
     next(error);
   }

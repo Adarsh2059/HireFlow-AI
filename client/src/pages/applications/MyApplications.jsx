@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import DashboardLayout from "../../layouts/DashboardLayout";
+import CandidateLayout from "../../layouts/CandidateLayout";
 
 import ApplicationCard from "../../components/applications/ApplicationCard";
 
@@ -12,12 +12,20 @@ function MyApplications() {
   const [applications, setApplications] =
     useState([]);
 
+  const [loading, setLoading] = useState(true);
+
   const fetchApplications =
     async () => {
-      const response =
-        await getMyApplications();
+      try {
+        const response =
+          await getMyApplications();
 
-      setApplications(response.data);
+        setApplications(response.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
     };
 
   useEffect(() => {
@@ -25,7 +33,7 @@ function MyApplications() {
   }, []);
 
   return (
-    <DashboardLayout>
+    <CandidateLayout>
 
       <div className="space-y-8">
 
@@ -41,27 +49,36 @@ function MyApplications() {
 
         </div>
 
-        <div className="space-y-5">
-
-          {applications.map(
-            (application) => (
-              <ApplicationCard
-                key={application._id}
-                application={
-                  application
-                }
-                refreshApplications={
-                  fetchApplications
-                }
-              />
-            )
-          )}
-
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          </div>
+        ) : applications.length === 0 ? (
+          <div className="rounded-xl border bg-white p-10 text-center">
+            <h2 className="text-xl font-semibold text-slate-700">No Applications Yet</h2>
+            <p className="mt-2 text-slate-500">Start applying to jobs to see your applications here.</p>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {applications.map(
+              (application) => (
+                <ApplicationCard
+                  key={application._id}
+                  application={
+                    application
+                  }
+                  refreshApplications={
+                    fetchApplications
+                  }
+                />
+              )
+            )}
+          </div>
+        )}
 
       </div>
 
-    </DashboardLayout>
+    </CandidateLayout>
   );
 }
 

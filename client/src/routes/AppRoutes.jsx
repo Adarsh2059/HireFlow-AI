@@ -13,6 +13,9 @@ import ATSReport from "../pages/ats/ATSReport";
 import RecruiterDashboard from "../pages/recruiter/RecruiterDashboard";
 import MyJobs from "../pages/recruiter/MyJobs";
 import RoleRedirect from "../components/auth/RoleRedirect";
+import EditJob from "../pages/recruiter/EditJob";
+import CreateJob from "../pages/recruiter/CreateJob";
+import JobApplicants from "../pages/recruiter/JobApplicants";
 
 function AppRoutes() {
   return (
@@ -20,13 +23,13 @@ function AppRoutes() {
       <Route path="/" element={<RoleRedirect />} />
 
       <Route
-  path="/candidate/dashboard"
-  element={
-    <ProtectedRoute allowedRoles={["candidate"]}>
-      <CandidateDashboard />
-    </ProtectedRoute>
-  }
-/>
+        path="/candidate/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["candidate"]}>
+            <CandidateDashboard />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/login"
@@ -92,22 +95,48 @@ function AppRoutes() {
       />
 
       <Route
-  path="/recruiter/dashboard"
-  element={
-    <ProtectedRoute allowedRoles={["recruiter"]}>
-      <RecruiterDashboard />
-    </ProtectedRoute>
-  }
-/>
+        path="/recruiter/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["recruiter"]}>
+            <RecruiterDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-<Route
-  path="/recruiter/jobs"
-  element={
-    <ProtectedRoute>
-      <MyJobs />
-    </ProtectedRoute>
-  }
-/>
+      <Route
+        path="/recruiter/jobs"
+        element={
+          <ProtectedRoute>
+            <MyJobs />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/recruiter/jobs/edit/:id"
+        element={
+          <ProtectedRoute allowedRoles={["recruiter"]}>
+            <EditJob />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/recruiter/jobs/:jobId/applicants"
+        element={
+          <ProtectedRoute allowedRoles={["recruiter", "admin"]}>
+            <JobApplicants />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/recruiter/jobs/create"
+        element={
+          <ProtectedRoute allowedRoles={["recruiter", "admin"]}>
+            <CreateJob />
+          </ProtectedRoute>
+        }
+      />
 
       <Route path="*" element={<h1>404 Page Not Found</h1>} />
     </Routes>

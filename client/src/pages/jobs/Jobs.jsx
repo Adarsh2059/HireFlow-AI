@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import DashboardLayout from "../../layouts/DashboardLayout";
+import CandidateLayout from "../../layouts/CandidateLayout";
 
 import JobCard from "../../components/jobs/JobCard";
 import JobSearch from "../../components/jobs/JobSearch";
@@ -25,7 +25,7 @@ function Jobs() {
   }, [search]);
 
   return (
-    <DashboardLayout>
+    <CandidateLayout>
 
       <div className="space-y-8">
 
@@ -59,7 +59,7 @@ function Jobs() {
 
       </div>
 
-    </DashboardLayout>
+    </CandidateLayout>
   );
 }
 
