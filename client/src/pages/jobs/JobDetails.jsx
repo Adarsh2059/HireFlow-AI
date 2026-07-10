@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import CandidateLayout from "../../layouts/CandidateLayout";
@@ -8,20 +8,14 @@ import { getJobById } from "../../services/jobService";
 
 import { applyJob, getMyApplications } from "../../services/applicationService";
 
-import { generateATS, getATSStatus } from "../../services/atsService";
-
 function JobDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [applicationStatus, setApplicationStatus] = useState(null);
-
-  const [generating, setGenerating] = useState(false);
-
-  const [hasATSReport, setHasATSReport] = useState(false);
+  const [applying, setApplying] = useState(false);
 
   useEffect(() => {
     fetchJob();
@@ -47,16 +41,6 @@ function JobDetails() {
       } catch (error) {
         console.log("Applications Error:", error);
       }
-
-      // Load ATS Status
-      try {
-        const atsStatus = await getATSStatus(id);
-
-        setHasATSReport(atsStatus.data.exists);
-      } catch (error) {
-        // No ATS report exists yet
-        setHasATSReport(false);
-      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to load job.");
     } finally {
@@ -66,6 +50,8 @@ function JobDetails() {
 
   const handleApply = async () => {
     try {
+      setApplying(true);
+
       await applyJob(id);
 
       toast.success("Application submitted successfully.");
@@ -73,29 +59,8 @@ function JobDetails() {
       await fetchJob();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to apply.");
-    }
-  };
-
-  const handleAnalyze = async () => {
-    if (hasATSReport) {
-      navigate(`/ats/${id}`);
-      return;
-    }
-
-    try {
-      setGenerating(true);
-
-      const response = await generateATS(id);
-
-      toast.success(response.message);
-
-      setHasATSReport(true);
-
-      navigate(`/ats/${id}`);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Analysis failed.");
     } finally {
-      setGenerating(false);
+      setApplying(false);
     }
   };
 
@@ -124,6 +89,28 @@ function JobDetails() {
 
   return (
     <CandidateLayout>
+      {applying && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+            <div className="flex justify-center">
+              <div className="h-14 w-14 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+            </div>
+
+            <h2 className="mt-6 text-center text-2xl font-semibold">
+              Submitting Application
+            </h2>
+
+            <p className="mt-3 text-center text-slate-500">
+              Please wait while we save your application, secure your submitted
+              resume, and generate your personalized ATS report.
+            </p>
+
+            <p className="mt-6 text-center text-sm text-slate-400">
+              This usually takes a few seconds...
+            </p>
+          </div>
+        </div>
+      )}
       <div className="max-w-5xl space-y-8">
         <div>
           <h1 className="text-4xl font-bold">{job.title}</h1>
@@ -152,26 +139,14 @@ function JobDetails() {
         <div className="flex flex-wrap gap-4">
           <button
             onClick={handleApply}
-            disabled={applicationStatus !== null}
+            disabled={applicationStatus !== null || applying}
             className={`rounded-lg px-8 py-3 font-medium text-white transition ${
-              applicationStatus
+              applicationStatus || applying
                 ? "cursor-not-allowed bg-slate-500"
                 : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
-            {applicationStatus || "Apply Now"}
-          </button>
-
-          <button
-            onClick={handleAnalyze}
-            disabled={generating}
-            className="rounded-lg border border-blue-600 px-8 py-3 font-medium text-blue-600 transition hover:bg-blue-50 disabled:opacity-50"
-          >
-            {generating
-              ? "Generating..."
-              : hasATSReport
-                ? "View ATS Report"
-                : "Analyze Resume"}
+            {applying ? "Submitting..." : applicationStatus || "Apply Now"}
           </button>
         </div>
       </div>

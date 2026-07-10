@@ -5,9 +5,11 @@ import CandidateLayout from "../../layouts/CandidateLayout";
 
 import { getATSReport } from "../../services/atsService";
 
-import ATSScoreCard from "../../components/ats/ATSScoreCard";
-import ATSSkillsCard from "../../components/ats/ATSSkillsCard";
-import ATSSummaryCard from "../../components/ats/ATSSummaryCard";
+import ATSFullReport from "../../components/ats/ATSFullReport";
+import ATSReviewCard from "../../components/ats/ATSReviewCard";
+import ATSInterviewCard from "../../components/ats/ATSInterviewCard";
+
+import toast from "react-hot-toast";
 
 function ATSReport() {
   const { jobId } = useParams();
@@ -27,14 +29,49 @@ function ATSReport() {
   }, []);
 
   const fetchReport = async () => {
-    try {
-      const response = await getATSReport(jobId);
+  try {
+    const response = await getATSReport(jobId);
 
-      setReport(response.data);
-    } finally {
-      setLoading(false);
+    setReport(response.data);
+
+  } catch (error) {
+
+    // If report doesn't exist, generate it automatically
+    if (error.response?.status === 404) {
+
+      toast.loading("Generating ATS Report...", {
+        id: "ats",
+      });
+
+      await generateATS(jobId);
+
+      const latest =
+        await getATSReport(jobId);
+
+      setReport(latest.data);
+
+      toast.success(
+        "ATS Report generated successfully.",
+        {
+          id: "ats",
+        }
+      );
+
+    } else {
+
+      toast.error(
+        error.response?.data?.message ||
+        "Failed to load ATS Report."
+      );
+
     }
-  };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
 
   if (loading) {
     return (
@@ -70,15 +107,8 @@ function ATSReport() {
         <h1 className="text-3xl font-bold">ATS Resume Report</h1>
 
         {report && (
-          <>
-            <ATSScoreCard jobMatch={report.jobMatch} />
-
-            <ATSSkillsCard
-              analysis={report.analysis}
-              jobMatch={report.jobMatch}
-            />
-
-            <ATSSummaryCard summary={report.summary} />
+          <> 
+            <ATSFullReport report={report}/>
           </>
         )}
       </div>

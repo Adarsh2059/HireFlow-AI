@@ -14,6 +14,11 @@ import {
   generateATSReport,
 } from "../services/geminiService.js";
 
+import Application from "../models/Application.js";
+
+import {
+  generateATSForApplication,
+} from "../services/atsGenerationService.js";
 // =====================================
 // Generate ATS Report (ONLY ONCE)
 // =====================================
@@ -24,114 +29,37 @@ export const generateATS = async (
   next
 ) => {
   try {
+
     const { jobId } = req.params;
     const { candidateId } = req.query;
 
     let candidateQueryId = req.user._id;
+
     if (
-      (req.user.role === "recruiter" || req.user.role === "admin") &&
+      (req.user.role === "recruiter" ||
+        req.user.role === "admin") &&
       candidateId
     ) {
       candidateQueryId = candidateId;
     }
 
-    const candidate = await User.findById(
-      candidateQueryId
-    );
-
-    if (!candidate) {
-      throw new ApiError(
-        404,
-        "Candidate not found."
-      );
-    }
-
-    if (!candidate.resumeText) {
-      throw new ApiError(
-        400,
-        "Please upload your resume first."
-      );
-    }
-
-    const job = await Job.findById(jobId);
-
-    if (!job) {
-      throw new ApiError(
-        404,
-        "Job not found."
-      );
-    }
-
-    // Check Cache
-
-    const existingReport =
-      await ATSReport.findOne({
-        candidate: candidate._id,
-        job: job._id,
+    const application =
+      await Application.findOne({
+        candidate: candidateQueryId,
+        job: jobId,
       });
 
-    if (existingReport) {
-      return res.status(200).json(
-        new ApiResponse(
-          200,
-          "ATS report already exists.",
-          existingReport
-        )
+    if (!application) {
+      throw new ApiError(
+        404,
+        "Application not found."
       );
     }
-
-    // Local Analysis
-
-    const analysis = analyzeResume(
-      candidate.resumeText
-    );
-
-    const jobMatch =
-      matchResumeToJob(
-        analysis.skills,
-        `${job.title}
-
-${job.description}
-
-${job.requirements.join("\n")}`
-      );
-
-    // AI
-
-    const aiReport =
-      await generateATSReport({
-        analysis,
-        jobMatch,
-        jobDescription: `${job.title}
-
-${job.description}
-
-${job.requirements.join("\n")}`,
-      });
-
-    // Save
 
     const report =
-      await ATSReport.create({
-        candidate: candidate._id,
-
-        job: job._id,
-
-        analysis,
-
-        jobMatch,
-
-        summary: aiReport.summary,
-
-        review: aiReport.review,
-
-        interviewQuestions:
-          aiReport.interviewQuestions,
-
-        status: "completed",
-
-        lastGeneratedAt: new Date(),
-      });
+      await generateATSForApplication(
+        application
+      );
 
     return res.status(201).json(
       new ApiResponse(
@@ -174,11 +102,15 @@ export const getATSReport = async (
       });
 
     if (!report) {
-      throw new ApiError(
-        404,
-        "ATS report not found."
-      );
-    }
+
+    await generateATS(req,res,next);
+
+    report = await ATSReport.findOne({
+        candidate: candidateQueryId,
+        job: jobId,
+    });
+
+}
 
     return res.status(200).json(
       new ApiResponse(
@@ -216,15 +148,35 @@ export const reAnalyzeATS = async (
     }
 
     await ATSReport.findOneAndDelete({
-      candidate: candidateQueryId,
-      job: jobId,
-    });
+  candidate: candidateQueryId,
+  job: jobId,
+});
 
-    return generateATS(
-      req,
-      res,
-      next
-    );
+const application =
+  await Application.findOne({
+    candidate: candidateQueryId,
+    job: jobId,
+  });
+
+if (!application) {
+  throw new ApiError(
+    404,
+    "Application not found."
+  );
+}
+
+const report =
+  await generateATSForApplication(
+    application
+  );
+
+return res.status(200).json(
+  new ApiResponse(
+    200,
+    "ATS Report regenerated successfully.",
+    report
+  )
+);
 
   } catch (error) {
     next(error);

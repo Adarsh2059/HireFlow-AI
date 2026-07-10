@@ -1,4 +1,4 @@
-
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -13,10 +13,11 @@ function JobForm({
   loading = false,
   submitText = "Create Job",
 }) {
-    
+
   const {
   register,
   handleSubmit,
+  reset,
   formState: { errors },
 } = useForm({
   resolver: zodResolver(jobSchema),
@@ -36,6 +37,25 @@ function JobForm({
   },
 });
 
+    useEffect(() => {
+  if (!initialValues) return;
+
+  reset({
+    title: initialValues.title || "",
+    company: initialValues.company || "",
+    location: initialValues.location || "",
+    salary: initialValues.salary || "",
+    employmentType:
+      initialValues.employmentType || "Full-Time",
+    experience:
+      initialValues.experience || "Fresher",
+    description:
+      initialValues.description || "",
+    requirements:
+      initialValues.requirements?.join("\n") || "",
+  });
+
+}, [initialValues, reset]);
 
   const submitHandler = (data) => {
     onSubmit({

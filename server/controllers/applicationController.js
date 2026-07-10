@@ -6,6 +6,8 @@ import {
   APPLICATION_STATUS,
   ALLOWED_STATUS_TRANSITIONS,
 } from "../constants/applicationStatus.js";
+import User from "../models/User.js";
+import { generateATSForApplication } from "../services/atsGenerationService.js";
 
 export const applyJob = async (req, res, next) => {
   try {
@@ -13,37 +15,50 @@ export const applyJob = async (req, res, next) => {
 
     const candidateId = req.user._id;
 
-    // Check Job Exists
+    const candidate = await User.findById(candidateId);
+
+    if (!candidate.resumeUrl) {
+      throw new ApiError(400, "Please upload your resume before applying.");
+    }
+
     const job = await Job.findById(jobId);
 
     if (!job) {
       throw new ApiError(404, "Job not found");
     }
 
-    // Prevent Recruiters/Admin from applying
     if (req.user.role !== "candidate") {
-      throw new ApiError(403, "Only candidates can apply for jobs");
+      throw new ApiError(403, "Only candidates can apply");
     }
 
-    // Duplicate Check
+    if (job.status !== "Open") {
+      throw new ApiError(400, "This job is closed.");
+    }
+
     const alreadyApplied = await Application.findOne({
       candidate: candidateId,
       job: jobId,
     });
 
-    if (job.status !== "Open") {
-      throw new ApiError(400, "This job is no longer accepting applications.");
-    }
-
     if (alreadyApplied) {
-      throw new ApiError(409, "You have already applied for this job");
+      throw new ApiError(409, "Already applied.");
     }
 
-    // Create Application
     const application = await Application.create({
       candidate: candidateId,
+
       job: jobId,
+
+      resumeSnapshot: {
+        resumeUrl: candidate.resumeUrl,
+
+        resumeText: candidate.resumeText,
+
+        uploadedAt: candidate.resumeUploadedAt,
+      },
     });
+
+    await generateATSForApplication(application);
 
     res
       .status(201)
@@ -112,7 +127,7 @@ export const getApplicantsForJob = async (req, res, next) => {
     const applications = await Application.find({
       job: jobId,
     })
-      .populate("candidate", "name email avatar createdAt resumeUrl")
+      .populate("candidate", "name email avatar createdAt")
       .populate("job", "_id title")
       .sort({
         createdAt: -1,

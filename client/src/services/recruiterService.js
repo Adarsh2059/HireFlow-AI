@@ -36,3 +36,8 @@ export const deleteJob = async (
 
   return response.data;
 };
+
+export const getRecruiterJobById = async (jobId) => {
+  const response = await api.get(`/jobs/${jobId}`);
+  return response.data;
+};

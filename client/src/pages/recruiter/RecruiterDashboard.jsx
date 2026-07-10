@@ -1,19 +1,10 @@
 import { useEffect, useState } from "react";
-
-import {
-  BriefcaseBusiness,
-  FolderOpen,
-  Users,
-  BadgeCheck,
-} from "lucide-react";
+import { Link } from "react-router-dom";
 
 import RecruiterLayout from "../../layouts/RecruiterLayout";
-
 import DashboardStatCard from "../../components/recruiter/DashboardStatCard";
 
 import { getRecruiterDashboard } from "../../services/recruiterService";
-
-import { Link } from "react-router-dom";
 
 function RecruiterDashboard() {
   const [dashboard, setDashboard] = useState(null);
@@ -26,40 +17,22 @@ function RecruiterDashboard() {
 
   const fetchDashboard = async () => {
     try {
-      const data =
-        await getRecruiterDashboard();
+      const data = await getRecruiterDashboard();
 
       setDashboard(data);
-
     } catch (error) {
-
       console.log(error);
-
     } finally {
-
       setLoading(false);
-
     }
   };
 
   if (loading) {
     return (
       <RecruiterLayout>
-
-        <div className="flex h-[70vh] items-center justify-center">
-
-          <div className="space-y-4 text-center">
-
-            <div className="mx-auto h-14 w-14 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-
-            <p className="font-medium">
-              Loading Dashboard...
-            </p>
-
-          </div>
-
+        <div className="flex justify-center py-20">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
         </div>
-
       </RecruiterLayout>
     );
   }
@@ -68,56 +41,49 @@ function RecruiterDashboard() {
     {
       title: "Jobs Posted",
       value: dashboard.totalJobs,
-      icon: BriefcaseBusiness,
     },
     {
       title: "Open Jobs",
       value: dashboard.openJobs,
-      icon: FolderOpen,
     },
     {
       title: "Applications",
       value: dashboard.totalApplications,
-      icon: Users,
     },
     {
       title: "Hired",
       value: dashboard.hired,
-      icon: BadgeCheck,
     },
   ];
 
   return (
     <RecruiterLayout>
-
-      <div className="space-y-10">
+      <div className="space-y-8">
 
         <div>
-
           <h1 className="text-3xl font-bold">
             Recruiter Dashboard
           </h1>
 
           <p className="mt-2 text-slate-500">
-            Manage jobs and applicants.
+            Manage jobs and applicants from one place.
           </p>
-
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-
           {stats.map((item) => (
             <DashboardStatCard
               key={item.title}
               {...item}
             />
           ))}
-
         </div>
+
+        {/* Recent Jobs */}
 
         <div className="rounded-xl border bg-white shadow-sm">
 
-          <div className="border-b p-6">
+          <div className="border-b px-6 py-4">
 
             <h2 className="text-xl font-semibold">
               Recent Jobs
@@ -125,124 +91,107 @@ function RecruiterDashboard() {
 
           </div>
 
-          {dashboard.recentJobs.length === 0 ? (
+          <div className="overflow-x-auto">
 
-            <div className="p-10 text-center text-slate-500">
+            <table className="min-w-full">
 
-              No jobs posted yet.
+              <thead className="bg-slate-50">
 
-            </div>
+                <tr>
 
-          ) : (
+                  <th className="px-6 py-3 text-left">
+                    Job
+                  </th>
 
-            <div className="overflow-x-auto">
+                  <th className="px-6 py-3 text-left">
+                    Applicants
+                  </th>
 
-              <table className="min-w-full">
+                  <th className="px-6 py-3 text-left">
+                    Status
+                  </th>
 
-                <thead className="bg-slate-50">
+                  <th className="px-6 py-3 text-left">
+                    Created
+                  </th>
 
-                  <tr>
+                  <th className="px-6 py-3 text-center">
+                    Action
+                  </th>
 
-                    <th className="px-6 py-4 text-left">
-                      Job
-                    </th>
+                </tr>
 
-                    <th className="px-6 py-4 text-left">
-                      Applicants
-                    </th>
+              </thead>
 
-                    <th className="px-6 py-4 text-left">
-                      Status
-                    </th>
+              <tbody>
 
-                    <th className="px-6 py-4 text-left">
-                      Created
-                    </th>
+                {dashboard.recentJobs.map((job) => (
 
-                    <th className="px-6 py-4 text-left">
-                      Action
-                    </th>
+                  <tr
+                    key={job._id}
+                    className="border-t hover:bg-slate-50"
+                  >
+
+                    <td className="px-6 py-4">
+
+                      <div className="font-semibold">
+                        {job.title}
+                      </div>
+
+                      <div className="text-sm text-slate-500">
+                        {job.company}
+                      </div>
+
+                    </td>
+
+                    <td className="px-6 py-4">
+                      {job.applicantCount}
+                    </td>
+
+                    <td className="px-6 py-4">
+
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm ${
+                          job.status === "Open"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {job.status}
+                      </span>
+
+                    </td>
+
+                    <td className="px-6 py-4">
+                      {new Date(
+                        job.createdAt
+                      ).toLocaleDateString()}
+                    </td>
+
+                    <td className="px-6 py-4 text-center">
+
+                      <Link
+                        to={`/recruiter/jobs/${job._id}/applicants`}
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                      >
+                        View Applicants
+                      </Link>
+
+                    </td>
 
                   </tr>
 
-                </thead>
+                ))}
 
-                <tbody>
+              </tbody>
 
-                  {dashboard.recentJobs.map((job) => (
+            </table>
 
-                    <tr
-                      key={job._id}
-                      className="border-t"
-                    >
-
-                      <td className="px-6 py-5">
-
-                        <h3 className="font-semibold">
-                          {job.title}
-                        </h3>
-
-                        <p className="text-sm text-slate-500">
-                          {job.company}
-                        </p>
-
-                      </td>
-
-                      <td className="px-6 py-5">
-
-                        {job.applicantCount}
-
-                      </td>
-
-                      <td className="px-6 py-5">
-
-                        <span
-                          className={`rounded-full px-3 py-1 text-sm font-medium ${
-                            job.status === "Open"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
-                        >
-                          {job.status}
-                        </span>
-
-                      </td>
-
-                      <td className="px-6 py-5">
-
-                        {new Date(
-                          job.createdAt
-                        ).toLocaleDateString()}
-
-                      </td>
-
-                      <td className="px-6 py-5">
-
-                        <Link
-                          to={`/recruiter/jobs/${job._id}/applicants`}
-                          className="font-medium text-blue-600 hover:underline"
-                        >
-                          View Applicants
-                        </Link>
-
-                      </td>
-
-                    </tr>
-
-                  ))}
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          )}
+          </div>
 
         </div>
 
       </div>
-
     </RecruiterLayout>
   );
 }

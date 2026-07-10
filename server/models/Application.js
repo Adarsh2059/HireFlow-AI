@@ -21,9 +21,21 @@ const applicationSchema = new mongoose.Schema(
       default: APPLICATION_STATUS.APPLIED,
     },
 
-    resume: {
-      type: String,
-      default: "",
+    resumeSnapshot: {
+      resumeUrl: {
+        type: String,
+        required: true,
+      },
+
+      resumeText: {
+        type: String,
+        required: true,
+      },
+
+      uploadedAt: {
+        type: Date,
+        required: true,
+      },
     },
   },
   {

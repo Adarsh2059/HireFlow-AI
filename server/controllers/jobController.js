@@ -2,187 +2,231 @@ import Job from "../models/Job.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import Application from "../models/Application.js";
-import ATSReport from "../models/ATSReport.js"
+import ATSReport from "../models/ATSReport.js";
 
 export const createJob = async (req, res, next) => {
-    try {
-        const {
-            title,
-            company,
-            location,
-            description,
-            requirements,
-            salary,
-            employmentType,
-            experience,
-        } = req.body;
+  try {
+    const {
+      title,
+      company,
+      location,
+      description,
+      requirements,
+      salary,
+      employmentType,
+      experience,
+    } = req.body;
 
-        // Basic Validation
-        if (
-            !title ||
-            !company ||
-            !location ||
-            !description ||
-            !salary
-        ) {
-            throw new ApiError(
-                400,
-                "Please fill all required fields"
-            );
-        }
-
-        const job = await Job.create({
-            title,
-            company,
-            location,
-            description,
-            requirements,
-            salary,
-            employmentType,
-            experience,
-            recruiter: req.user._id,
-        });
-
-        res.status(201).json(
-            new ApiResponse(
-                201,
-                "Job created successfully",
-                job
-            )
-        );
-
-    } catch (error) {
-        next(error);
+    // Basic Validation
+    if (!title || !company || !location || !description || !salary) {
+      throw new ApiError(400, "Please fill all required fields");
     }
+
+    const job = await Job.create({
+      title,
+      company,
+      location,
+      description,
+      requirements,
+      salary,
+      employmentType,
+      experience,
+      recruiter: req.user._id,
+    });
+
+    res.status(201).json(new ApiResponse(201, "Job created successfully", job));
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const getAllJobs = async (req, res, next) => {
-    try {
+  try {
+    const {
+      search,
+      location,
+      employmentType,
+      experience,
+      page = 1,
+      limit = 10,
+      sort = "latest",
+    } = req.query;
 
-        const {
-            search,
-            location,
-            employmentType,
-            experience,
-            page = 1,
-            limit = 10,
-            sort = "latest",
-        } = req.query;
+    let filter = {};
 
-        let filter = {};
+    let sortOption = {};
 
-         let sortOption = {};
-
-switch (sort) {
-    case "latest":
+    switch (sort) {
+      case "latest":
         sortOption = { createdAt: -1 };
         break;
 
-    case "oldest":
+      case "oldest":
         sortOption = { createdAt: 1 };
         break;
 
-    case "salary_desc":
+      case "salary_desc":
         sortOption = { salary: -1 };
         break;
 
-    case "salary_asc":
+      case "salary_asc":
         sortOption = { salary: 1 };
         break;
 
-    default:
+      default:
         sortOption = { createdAt: -1 };
-}
-
-        // Search
-        if (search) {
-            filter.$or = [
-                {
-                    title: {
-                        $regex: search,
-                        $options: "i",
-                    },
-                },
-                {
-                    company: {
-                        $regex: search,
-                        $options: "i",
-                    },
-                },
-            ];
-        }
-
-        // Filters
-        if (location) {
-            filter.location = {
-                $regex: location,
-                $options: "i",
-            };
-        }
-
-        if (employmentType) {
-            filter.employmentType = employmentType;
-        }
-
-        if (experience) {
-            filter.experience = experience;
-        }
-
-        // Convert to Number
-        const pageNumber = Number(page);
-        const limitNumber = Number(limit);
-
-        // Skip Formula
-        const skip = (pageNumber - 1) * limitNumber;
-
-        // Total Jobs
-        const totalJobs = await Job.countDocuments(filter);
-
-        const jobs = await Job.find(filter)
-            .populate("recruiter", "name email")
-            .sort(sortOption)
-            .skip(skip)
-            .limit(limitNumber);
-
-        res.status(200).json(
-            new ApiResponse(
-                200,
-                "Jobs fetched successfully",
-                {
-                    jobs,
-                    pagination: {
-                        totalJobs,
-                        currentPage: pageNumber,
-                        totalPages: Math.ceil(totalJobs / limitNumber),
-                        limit: limitNumber,
-                    },
-                }
-            )
-        );
-
-    } catch (error) {
-        next(error);
     }
+
+    // Search
+    if (search) {
+      filter.$or = [
+        {
+          title: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          company: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    // Filters
+    if (location) {
+      filter.location = {
+        $regex: location,
+        $options: "i",
+      };
+    }
+
+    if (employmentType) {
+      filter.employmentType = employmentType;
+    }
+
+    if (experience) {
+      filter.experience = experience;
+    }
+
+    // Convert to Number
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+
+    // Skip Formula
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Total Jobs
+    const totalJobs = await Job.countDocuments(filter);
+
+    const jobs = await Job.find(filter)
+      .populate("recruiter", "name email")
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limitNumber);
+
+    res.status(200).json(
+      new ApiResponse(200, "Jobs fetched successfully", {
+        jobs,
+        pagination: {
+          totalJobs,
+          currentPage: pageNumber,
+          totalPages: Math.ceil(totalJobs / limitNumber),
+          limit: limitNumber,
+        },
+      }),
+    );
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const getRecruiterJobs = async (
-  req,
-  res,
-  next
-) => {
+export const getRecruiterJobs = async (req, res, next) => {
   try {
-
     const jobs = await Job.find({
       recruiter: req.user._id,
     }).sort({
       createdAt: -1,
     });
 
+    res
+      .status(200)
+      .json(new ApiResponse(200, "Recruiter jobs fetched successfully", jobs));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getJobById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const job = await Job.findById(id).populate("recruiter", "name email");
+
+    if (!job) {
+      throw new ApiError(404, "Job not found");
+    }
+
+    res.status(200).json(new ApiResponse(200, "Job fetched successfully", job));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const patchJob = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const job = await Job.findById(id);
+
+    if (!job) {
+      throw new ApiError(404, "Job not found");
+    }
+
+    // Ownership Check
+    if (
+      req.user.role !== "admin" &&
+      job.recruiter.toString() !== req.user._id.toString()
+    ) {
+      throw new ApiError(403, "You can update only your own jobs");
+    }
+
+    // Store old ATS-related fields
+    const previous = {
+      title: job.title,
+      description: job.description,
+      requirements: [...job.requirements],
+    };
+
+    // Update job
+    const updatedJob = await Job.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    }).populate("recruiter", "name email");
+
+    // Check whether ATS is affected
+    const atsAffected =
+      previous.title !== updatedJob.title ||
+      previous.description !== updatedJob.description ||
+      JSON.stringify(previous.requirements) !==
+        JSON.stringify(updatedJob.requirements);
+
+    // Delete ATS reports only if ATS-related fields changed
+    if (atsAffected) {
+      await ATSReport.deleteMany({
+        job: updatedJob._id,
+      });
+    }
+
     res.status(200).json(
       new ApiResponse(
         200,
-        "Recruiter jobs fetched successfully",
-        jobs
+        atsAffected
+          ? "Job updated successfully. ATS reports invalidated."
+          : "Job updated successfully.",
+        updatedJob
       )
     );
 
@@ -191,118 +235,43 @@ export const getRecruiterJobs = async (
   }
 };
 
-export const getJobById = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-
-        const job = await Job.findById(id)
-            .populate("recruiter", "name email");
-
-        if (!job) {
-            throw new ApiError(404, "Job not found");
-        }
-
-        res.status(200).json(
-            new ApiResponse(
-                200,
-                "Job fetched successfully",
-                job
-            )
-        );
-
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const patchJob = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-
-        const job = await Job.findById(id);
-
-        if (!job) {
-            throw new ApiError(404, "Job not found");
-        }
-
-        // Ownership Check
-        if (
-            req.user.role !== "admin" &&
-            job.recruiter.toString() !== req.user._id.toString()
-        ) {
-            throw new ApiError(
-                403,
-                "You can update only your own jobs"
-            );
-        }
-
-        const updatedJob = await Job.findByIdAndUpdate(
-            id,
-            req.body,
-            {
-                new: true,
-                runValidators: true,
-            }
-        ).populate("recruiter", "name email");
-
-        res.status(200).json(
-            new ApiResponse(
-                200,
-                "Job updated successfully",
-                updatedJob
-            )
-        );
-
-    } catch (error) {
-        next(error);
-    }
-};
-
 export const deleteJob = async (req, res, next) => {
-    try {
-        const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-        const job = await Job.findById(id);
+    const job = await Job.findById(id);
 
-        if (!job) {
-            throw new ApiError(404, "Job not found");
-        }
-
-        // Ownership Check
-        if (
-            req.user.role !== "admin" &&
-            job.recruiter.toString() !== req.user._id.toString()
-        ) {
-            throw new ApiError(
-                403,
-                "You can delete only your own jobs"
-            );
-        }
-
-        // Delete all applications
-await Application.deleteMany({
-    job: id,
-});
-
-// Delete ATS reports
-await ATSReport.deleteMany({
-    job: id,
-});
-
-// Delete job
-await Job.findByIdAndDelete(id);
-
-        res.status(200).json(
-            new ApiResponse(
-                200,
-                "Job deleted successfully",
-                null
-            )
-        );
-
-    } catch (error) {
-        next(error);
+    if (!job) {
+      throw new ApiError(404, "Job not found");
     }
+
+    // Ownership Check
+    if (
+      req.user.role !== "admin" &&
+      job.recruiter.toString() !== req.user._id.toString()
+    ) {
+      throw new ApiError(403, "You can delete only your own jobs");
+    }
+
+    // Delete all applications related to this job
+    await Application.deleteMany({
+      job: job._id,
+    });
+
+    // Delete all ATS reports related to this job
+    await ATSReport.deleteMany({
+      job: job._id,
+    });
+
+    // Finally delete the job
+    await job.deleteOne();
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, "Job deleted successfully", null));
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const getDashboardStats = async (req, res, next) => {
@@ -355,28 +324,26 @@ export const getDashboardStats = async (req, res, next) => {
 
     const recentJobsWithCount = await Promise.all(
       recentJobs.map(async (job) => {
-        const applicantCount = await Application.countDocuments({ job: job._id });
+        const applicantCount = await Application.countDocuments({
+          job: job._id,
+        });
         return {
           ...job.toObject(),
           applicantCount,
         };
-      })
+      }),
     );
 
     res.status(200).json(
-      new ApiResponse(
-        200,
-        "Dashboard fetched successfully",
-        {
-          totalJobs,
-          openJobs,
-          closedJobs,
-          totalApplications,
-          shortlisted,
-          hired,
-          recentJobs: recentJobsWithCount,
-        }
-      )
+      new ApiResponse(200, "Dashboard fetched successfully", {
+        totalJobs,
+        openJobs,
+        closedJobs,
+        totalApplications,
+        shortlisted,
+        hired,
+        recentJobs: recentJobsWithCount,
+      }),
     );
   } catch (error) {
     next(error);
