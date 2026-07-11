@@ -9,6 +9,8 @@ import applicationRoutes from "./routes/applicationRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
 import atsRoutes from "./routes/atsRoutes.js";
 
+const app = express();
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://hire-flow-ai-two.vercel.app",
@@ -16,8 +18,11 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
+    origin(origin, callback) {
+      // Allow Postman, curl, server-to-server requests
+      if (!origin) {
+        return callback(null, true);
+      }
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
@@ -42,13 +47,9 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/api/auth", authRoutes);
-
 app.use("/api/jobs", jobRoutes);
-
 app.use("/api/applications", applicationRoutes);
-
 app.use("/api/resume", resumeRoutes);
-
 app.use("/api/ats", atsRoutes);
 
 // Global Error Handler
