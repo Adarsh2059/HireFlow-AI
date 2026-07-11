@@ -1,8 +1,8 @@
-
 import express from "express";
-
 import cors from "cors";
+
 import errorHandler from "./middlewares/errorHandler.js";
+
 import authRoutes from "./routes/authRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
@@ -11,42 +11,22 @@ import atsRoutes from "./routes/atsRoutes.js";
 
 const app = express();
 
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173",
-//     credentials: false,
-//   })
-// );
-
-import cors from "cors";
-
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://YOUR-VERCEL-PROJECT.vercel.app",
-];
-
+// CORS Configuration
 app.use(
   cors({
-    origin(origin, callback) {
-      // Allow requests with no origin (Postman, curl)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("Not allowed by CORS"));
-    },
+    origin: true,
     credentials: true,
   })
 );
 
 app.use(express.json());
 
+// Health Check
 app.get("/", (req, res) => {
   res.send("HireFlow AI API Running");
 });
 
+// Routes
 app.use("/api/auth", authRoutes);
 
 app.use("/api/jobs", jobRoutes);
@@ -57,7 +37,7 @@ app.use("/api/resume", resumeRoutes);
 
 app.use("/api/ats", atsRoutes);
 
+// Global Error Handler
 app.use(errorHandler);
 
 export default app;
-
