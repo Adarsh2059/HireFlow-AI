@@ -52,11 +52,19 @@ function JobDetails() {
     try {
       setApplying(true);
 
-      await applyJob(id);
+      const response = await applyJob(id);
 
-      toast.success("Application submitted successfully.");
+if (response.data.atsGenerated) {
+    toast.success(
+        "Application submitted successfully."
+    );
+} else {
+    toast.success(
+        "Application submitted. ATS report will be generated when available."
+    );
+}
 
-      await fetchJob();
+await fetchJob();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to apply.");
     } finally {

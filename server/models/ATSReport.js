@@ -14,34 +14,149 @@ const atsReportSchema = new mongoose.Schema(
       required: true,
     },
 
-    analysis: {
-      type: Object,
+    score: {
+      type: Number,
       required: true,
+      min: 0,
+      max: 100,
     },
 
-    jobMatch: {
-      type: Object,
-      required: true,
+    matchedSkills: {
+      type: [String],
+      default: [],
+    },
+
+    missingSkills: {
+      type: [String],
+      default: [],
     },
 
     summary: {
       type: String,
-      required: true,
+      default: "",
     },
 
     review: {
-      type: Object,
-      required: true,
+      overallRating: {
+        type: String,
+        default: "",
+      },
+
+      strengths: {
+        type: [String],
+        default: [],
+      },
+
+      weaknesses: {
+        type: [String],
+        default: [],
+      },
+
+      suggestions: {
+        type: [String],
+        default: [],
+      },
+    },
+
+    candidateAnalysis: {
+      skills: {
+        type: [String],
+        default: [],
+      },
+
+      education: [
+        {
+          institution: {
+            type: String,
+            default: "",
+          },
+
+          degree: {
+            type: String,
+            default: "",
+          },
+
+          dates: {
+            type: String,
+            default: "",
+          },
+
+          details: {
+            type: String,
+            default: "",
+          },
+        },
+      ],
+
+      experience: [
+        {
+          company: {
+            type: String,
+            default: "",
+          },
+
+          role: {
+            type: String,
+            default: "",
+          },
+
+          duration: {
+            type: String,
+            default: "",
+          },
+
+          description: {
+            type: String,
+            default: "",
+          },
+        },
+      ],
+
+      projects: [
+        {
+          title: {
+            type: String,
+            default: "",
+          },
+
+          description: {
+            type: String,
+            default: "",
+          },
+
+          technologies: {
+            type: [String],
+            default: [],
+          },
+        },
+      ],
     },
 
     interviewQuestions: {
-      type: Object,
-      required: true,
+      technical: {
+        type: [String],
+        default: [],
+      },
+
+      projectBased: {
+        type: [String],
+        default: [],
+      },
+
+      behavioral: {
+        type: [String],
+        default: [],
+      },
+
+      hr: {
+        type: [String],
+        default: [],
+      },
     },
 
     status: {
       type: String,
-      enum: ["processing", "completed", "failed"],
+      enum: ["completed", "failed", "pending"],
       default: "completed",
     },
 
@@ -52,16 +167,6 @@ const atsReportSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
-);
-
-atsReportSchema.index(
-  {
-    candidate: 1,
-    job: 1,
-  },
-  {
-    unique: true,
   }
 );
 

@@ -3,11 +3,9 @@ import { useParams } from "react-router-dom";
 
 import CandidateLayout from "../../layouts/CandidateLayout";
 
-import { getATSReport } from "../../services/atsService";
+import { getATSReport, generateATS } from "../../services/atsService";
 
-import ATSFullReport from "../../components/ats/ATSFullReport";
-import ATSReviewCard from "../../components/ats/ATSReviewCard";
-import ATSInterviewCard from "../../components/ats/ATSInterviewCard";
+import ATSReportView from "../../components/ats/ATSReportView";
 
 import toast from "react-hot-toast";
 
@@ -29,49 +27,48 @@ function ATSReport() {
   }, []);
 
   const fetchReport = async () => {
-  try {
-    const response = await getATSReport(jobId);
+    try {
+      const response = await getATSReport(jobId);
 
-    setReport(response.data);
-
-  } catch (error) {
-
-    // If report doesn't exist, generate it automatically
-    if (error.response?.status === 404) {
-
-      toast.loading("Generating ATS Report...", {
-        id: "ats",
-      });
-
-      await generateATS(jobId);
-
-      const latest =
-        await getATSReport(jobId);
-
-      setReport(latest.data);
-
-      toast.success(
-        "ATS Report generated successfully.",
-        {
+      setReport(response.data);
+    } catch (error) {
+      // If report doesn't exist, generate it automatically
+      if (error.response?.status === 404) {
+        toast.loading("Generating ATS Report...", {
           id: "ats",
+        });
+
+        try {
+          await generateATS(jobId);
+
+          const latest = await getATSReport(jobId);
+
+          setReport(latest.data);
+
+          toast.success("ATS Report generated successfully.", {
+            id: "ats",
+          });
+        } catch {
+          toast.error(
+            "ATS generation is temporarily unavailable. Please try again in a few minutes.",
+            {
+              id: "ats",
+            },
+          );
         }
-      );
 
-    } else {
-
-      toast.error(
-        error.response?.data?.message ||
-        "Failed to load ATS Report."
-      );
-
+        toast.success("ATS Report generated successfully.", {
+          id: "ats",
+        });
+      } else {
+        toast.error(
+          error.response?.data?.message || "Failed to load ATS Report.",
+        );
+      }
+    } finally {
+      setLoading(false);
     }
-
-  } finally {
-
-    setLoading(false);
-
-  }
-};
+  };
 
   if (loading) {
     return (
@@ -107,8 +104,8 @@ function ATSReport() {
         <h1 className="text-3xl font-bold">ATS Resume Report</h1>
 
         {report && (
-          <> 
-            <ATSFullReport report={report}/>
+          <>
+            <ATSReportView report={report}/>
           </>
         )}
       </div>

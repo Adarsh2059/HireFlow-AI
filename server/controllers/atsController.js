@@ -1,116 +1,81 @@
-import User from "../models/User.js";
-import Job from "../models/Job.js";
+import Application from "../models/Application.js";
 import ATSReport from "../models/ATSReport.js";
 
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 
-import {
-  analyzeResume,
-  matchResumeToJob,
-} from "../utils/ats/index.js";
+import { generateATSForApplication } from "../services/atsGenerationService.js";
 
-import {
-  generateATSReport,
-} from "../services/geminiService.js";
-
-import Application from "../models/Application.js";
-
-import {
-  generateATSForApplication,
-} from "../services/atsGenerationService.js";
 // =====================================
-// Generate ATS Report (ONLY ONCE)
+// Generate ATS Report
 // =====================================
 
-export const generateATS = async (
-  req,
-  res,
-  next
-) => {
+export const generateATS = async (req, res, next) => {
   try {
-
     const { jobId } = req.params;
     const { candidateId } = req.query;
 
-    let candidateQueryId = req.user._id;
+    let query = {
+      job: jobId,
+      candidate: req.user._id,
+    };
 
+    // Recruiter/Admin can generate ATS for any applicant
     if (
       (req.user.role === "recruiter" ||
         req.user.role === "admin") &&
       candidateId
     ) {
-      candidateQueryId = candidateId;
+      query.candidate = candidateId;
     }
 
-    const application =
-      await Application.findOne({
-        candidate: candidateQueryId,
-        job: jobId,
-      });
+    const application = await Application.findOne(query);
 
     if (!application) {
-      throw new ApiError(
-        404,
-        "Application not found."
-      );
+      throw new ApiError(404, "Application not found.");
     }
 
-    const report =
-      await generateATSForApplication(
-        application
-      );
+    const report = await generateATSForApplication(application);
 
     return res.status(201).json(
       new ApiResponse(
         201,
-        "ATS Report generated successfully.",
+        "ATS report generated successfully.",
         report
       )
     );
-
   } catch (error) {
     next(error);
   }
 };
 
 // =====================================
-// Get Cached Report
+// Get ATS Report
 // =====================================
 
-export const getATSReport = async (
-  req,
-  res,
-  next
-) => {
+export const getATSReport = async (req, res, next) => {
   try {
     const { jobId } = req.params;
     const { candidateId } = req.query;
 
-    let candidateQueryId = req.user._id;
+    let query = {
+      job: jobId,
+      candidate: req.user._id,
+    };
+
     if (
-      (req.user.role === "recruiter" || req.user.role === "admin") &&
+      (req.user.role === "recruiter" ||
+        req.user.role === "admin") &&
       candidateId
     ) {
-      candidateQueryId = candidateId;
+      query.candidate = candidateId;
     }
 
-    const report =
-      await ATSReport.findOne({
-        candidate: candidateQueryId,
-        job: jobId,
-      });
+    const report = await ATSReport.findOne(query);
 
     if (!report) {
-
-    await generateATS(req,res,next);
-
-    report = await ATSReport.findOne({
-        candidate: candidateQueryId,
-        job: jobId,
-    });
-
-}
+      throw new ApiError(404, "ATS report not found.");
+    }
 
     return res.status(200).json(
       new ApiResponse(
@@ -119,93 +84,83 @@ export const getATSReport = async (
         report
       )
     );
-
   } catch (error) {
     next(error);
   }
 };
 
 // =====================================
-// Re Analyze
+// Re Analyze ATS
 // =====================================
 
-export const reAnalyzeATS = async (
-  req,
-  res,
-  next
-) => {
+export const reAnalyzeATS = async (req, res, next) => {
   try {
-
     const { jobId } = req.params;
     const { candidateId } = req.query;
 
-    let candidateQueryId = req.user._id;
+    let query = {
+      job: jobId,
+      candidate: req.user._id,
+    };
+
     if (
-      (req.user.role === "recruiter" || req.user.role === "admin") &&
+      (req.user.role === "recruiter" ||
+        req.user.role === "admin") &&
       candidateId
     ) {
-      candidateQueryId = candidateId;
+      query.candidate = candidateId;
+    }
+
+    const application = await Application.findOne(query);
+
+    if (!application) {
+      throw new ApiError(404, "Application not found.");
     }
 
     await ATSReport.findOneAndDelete({
-  candidate: candidateQueryId,
-  job: jobId,
-});
+      candidate: application.candidate,
+      job: application.job,
+    });
 
-const application =
-  await Application.findOne({
-    candidate: candidateQueryId,
-    job: jobId,
-  });
+    const report = await generateATSForApplication(application);
 
-if (!application) {
-  throw new ApiError(
-    404,
-    "Application not found."
-  );
-}
-
-const report =
-  await generateATSForApplication(
-    application
-  );
-
-return res.status(200).json(
-  new ApiResponse(
-    200,
-    "ATS Report regenerated successfully.",
-    report
-  )
-);
-
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        "ATS report regenerated successfully.",
+        report
+      )
+    );
   } catch (error) {
     next(error);
   }
 };
 
-export const getATSStatus = async (
-  req,
-  res,
-  next
-) => {
-  try {
+// =====================================
+// ATS Status
+// =====================================
 
+export const getATSStatus = async (req, res, next) => {
+  try {
     const { jobId } = req.params;
     const { candidateId } = req.query;
 
-    let candidateQueryId = req.user._id;
+    let query = {
+      job: jobId,
+      candidate: req.user._id,
+    };
+
     if (
-      (req.user.role === "recruiter" || req.user.role === "admin") &&
+      (req.user.role === "recruiter" ||
+        req.user.role === "admin") &&
       candidateId
     ) {
-      candidateQueryId = candidateId;
+      query.candidate = candidateId;
     }
 
-    const report =
-      await ATSReport.findOne({
-        candidate: candidateQueryId,
-        job: jobId,
-      }).select("lastGeneratedAt");
+    const report = await ATSReport.findOne(query).select(
+      "lastGeneratedAt"
+    );
 
     return res.status(200).json(
       new ApiResponse(
@@ -218,7 +173,6 @@ export const getATSStatus = async (
         }
       )
     );
-
   } catch (error) {
     next(error);
   }

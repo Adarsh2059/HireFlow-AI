@@ -9,14 +9,14 @@ function ATSFullReport({ report }) {
 
   return (
     <div className="space-y-8">
-
       <ATSScoreCard
-        jobMatch={report.jobMatch}
+        score={report.score}
       />
 
       <ATSSkillsCard
-        analysis={report.analysis}
-        jobMatch={report.jobMatch}
+        matchedSkills={report.matchedSkills}
+        missingSkills={report.missingSkills}
+        candidateAnalysis={report.candidateAnalysis}
       />
 
       <ATSSummaryCard
@@ -28,11 +28,8 @@ function ATSFullReport({ report }) {
       />
 
       <ATSInterviewCard
-        interviewQuestions={
-          report.interviewQuestions
-        }
+        interviewQuestions={report.interviewQuestions}
       />
-
     </div>
   );
 }

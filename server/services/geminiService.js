@@ -1,17 +1,12 @@
 import ai from "../config/gemini.js";
 
-export const generateContent = async (
-  prompt,
-  parseJson = true
-) => {
+export const generateContent = async (prompt, parseJson = true) => {
   try {
-    console.log("Sending request to Gemini...");
 
-    const response =
-      await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
 
     const text = response.text.trim();
 
@@ -25,96 +20,107 @@ export const generateContent = async (
       return cleaned;
     }
 
-    return JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
 
+
+    return parsed;
   } catch (error) {
-
-    if (
-      error.status === 429 ||
-      error.message?.includes("RESOURCE_EXHAUSTED")
-    ) {
-      throw new Error(
-        "Gemini API quota exceeded. Please try again later."
-      );
+    if (error.status === 429 || error.message?.includes("RESOURCE_EXHAUSTED")) {
+      throw new Error("Gemini API quota exceeded. Please try again later.");
     }
 
     throw error;
   }
 };
 
-export const generateATSReport = async ({
-  analysis,
-  jobMatch,
-  jobDescription,
-}) => {
-
-  // Reduce prompt size before sending to Gemini
-  const candidate = {
-  skills: analysis.skills,
-
-  education: analysis.education,
-
-  experience: analysis.experience,
-
-  totalProjects:
-    analysis.projects?.totalProjects || 0,
-
-  strongestProject:
-    analysis.projects?.strongestProject?.title ||
-    analysis.projects?.strongestProject?.name ||
-    "N/A",
-};
-
-  const ats = {
-  score: jobMatch.matchPercentage,
-
-  matchedSkills: jobMatch.matchedSkills,
-
-  missingSkills: jobMatch.missingSkills,
-};
-
+export const generateATSReport = async ({ resumeText, jobDescription }) => {
   const prompt = `
-You are an experienced Senior Technical Recruiter and ATS Expert.
+You are an expert Applicant Tracking System (ATS), Senior Technical Recruiter, and Software Engineering Interviewer.
 
-You will receive:
+Your task is to analyze the candidate's resume ONLY using the provided resume and job description.
 
-1. Candidate Information
-2. ATS Matching Result
-3. Job Description
+IMPORTANT RULES:
 
-Your job is to produce ONE ATS Report.
+- Never invent or infer information.
+- Never guess missing skills.
+- Never fabricate education or experience.
+- Never assume projects that are not explicitly mentioned.
+- If a field is unavailable, return an empty array or an empty string.
+- ATS score must be an integer between 0 and 100.
+- matchedSkills must contain only skills present in BOTH the resume and job description.
+- missingSkills must contain only required job skills missing from the resume.
+- Return ONLY valid JSON.
+- Do not include markdown.
+- Do not wrap the JSON inside \`\`\`.
 
-Return ONLY valid JSON.
+Return exactly this structure:
 
 {
-  "summary":"",
+  "score": 0,
 
-  "review":{
-      "overallRating":"",
-      "strengths":[],
-      "weaknesses":[],
-      "suggestions":[]
+  "matchedSkills": [],
+
+  "missingSkills": [],
+
+  "summary": "",
+
+  "review": {
+    "overallRating": "",
+    "strengths": [],
+    "weaknesses": [],
+    "suggestions": []
   },
 
-  "interviewQuestions":{
+  "candidate": {
 
-      "technical":[],
-      "projectBased":[],
-      "behavioral":[],
-      "hr":[]
+    "skills": [],
+
+    "education": [
+      {
+        "institution": "",
+        "degree": "",
+        "dates": "",
+        "details": ""
+      }
+    ],
+
+    "experience": [
+      {
+        "company": "",
+        "role": "",
+        "duration": "",
+        "description": ""
+      }
+    ],
+
+    "projects": [
+      {
+        "title": "",
+        "description": "",
+        "technologies": []
+      }
+    ]
+  },
+
+  "interviewQuestions": {
+
+    "technical": [],
+
+    "projectBased": [],
+
+    "behavioral": [],
+
+    "hr": []
+
   }
 
 }
 
-Candidate:
+Resume:
 
-${JSON.stringify(candidate)}
+${resumeText}
 
-ATS:
-
-${JSON.stringify(ats)}
-
-Job:
+Job Description:
 
 ${jobDescription}
 `;

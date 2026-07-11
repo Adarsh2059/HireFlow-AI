@@ -81,11 +81,12 @@ function JobApplicants() {
 
           <div className="space-y-5">
 
-            {applicants.map((applicant) => (
+            {applicants.map((applicant, index) => (
 
               <ApplicantCard
                 key={applicant._id}
                 applicant={applicant}
+                rank={index + 1}
                 refreshApplicants={fetchApplicants}
               />
 

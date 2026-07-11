@@ -4,14 +4,15 @@ import toast from "react-hot-toast";
 import ATSModal from "./ATSModal";
 
 import { getATSReport, reAnalyzeATS } from "../../services/atsService";
-
 import { updateApplicationStatus } from "../../services/applicationService";
 
-function ApplicantCard({ applicant, refreshApplicants }) {
+function ApplicantCard({
+  applicant,
+  rank,
+  refreshApplicants,
+}) {
   const [report, setReport] = useState(null);
-
   const [openModal, setOpenModal] = useState(false);
-
   const [loadingATS, setLoadingATS] = useState(false);
 
   const nextStatus = {
@@ -22,9 +23,11 @@ function ApplicantCard({ applicant, refreshApplicants }) {
     Selected: "Hired",
   };
 
-  const canTakeAction = !["Rejected", "Hired", "Withdrawn"].includes(
-    applicant.status,
-  );
+  const canTakeAction = ![
+    "Rejected",
+    "Hired",
+    "Withdrawn",
+  ].includes(applicant.status);
 
   const handleViewATS = async () => {
     try {
@@ -32,14 +35,16 @@ function ApplicantCard({ applicant, refreshApplicants }) {
 
       const response = await getATSReport(
         applicant.job._id,
-        applicant.candidate._id,
+        applicant.candidate._id
       );
 
       setReport(response.data);
-
       setOpenModal(true);
     } catch (error) {
-      toast.error(error.response?.data?.message || "ATS Report not found");
+      toast.error(
+        error.response?.data?.message ||
+          "ATS Report not found"
+      );
     } finally {
       setLoadingATS(false);
     }
@@ -51,19 +56,22 @@ function ApplicantCard({ applicant, refreshApplicants }) {
 
       const response = await reAnalyzeATS(
         applicant.job._id,
-        applicant.candidate._id,
+        applicant.candidate._id
       );
 
       toast.success(response.message);
 
       const latest = await getATSReport(
         applicant.job._id,
-        applicant.candidate._id,
+        applicant.candidate._id
       );
 
       setReport(latest.data);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to re-analyze ATS.");
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to re-analyze ATS."
+      );
     } finally {
       setLoadingATS(false);
     }
@@ -71,13 +79,20 @@ function ApplicantCard({ applicant, refreshApplicants }) {
 
   const handleStatusUpdate = async (status) => {
     try {
-      const response = await updateApplicationStatus(applicant._id, status);
+      const response =
+        await updateApplicationStatus(
+          applicant._id,
+          status
+        );
 
       toast.success(response.message);
 
       refreshApplicants();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update status.");
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to update status."
+      );
     }
   };
 
@@ -88,15 +103,53 @@ function ApplicantCard({ applicant, refreshApplicants }) {
 
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-semibold">
-              {applicant.candidate.name}
-            </h2>
+            <div className="flex items-center gap-4">
+              <span
+                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${
+                  rank === 1
+                    ? "bg-yellow-100 text-yellow-700"
+                    : rank === 2
+                    ? "bg-slate-200 text-slate-700"
+                    : rank === 3
+                    ? "bg-orange-100 text-orange-700"
+                    : "bg-blue-100 text-blue-700"
+                }`}
+              >
+                #{rank}
+              </span>
 
-            <p className="text-slate-500">{applicant.candidate.email}</p>
+              <div>
+                <h2 className="text-xl font-semibold">
+                  {applicant.candidate.name}
+                </h2>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Applied on {new Date(applicant.createdAt).toLocaleDateString()}
+                <p className="text-sm text-slate-500">
+                  {applicant.candidate.email}
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-3 text-sm text-slate-500">
+              Applied on{" "}
+              {new Date(
+                applicant.createdAt
+              ).toLocaleDateString()}
             </p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span
+                className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                  applicant.atsScore >= 85
+                    ? "bg-green-100 text-green-700"
+                    : applicant.atsScore >= 70
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                ATS Score:{" "}
+                {applicant.atsScore ?? "--"}%
+              </span>
+            </div>
           </div>
 
           <span
@@ -104,23 +157,25 @@ function ApplicantCard({ applicant, refreshApplicants }) {
               applicant.status === "Rejected"
                 ? "bg-red-100 text-red-700"
                 : applicant.status === "Hired"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-blue-100 text-blue-700"
+                ? "bg-green-100 text-green-700"
+                : "bg-blue-100 text-blue-700"
             }`}
           >
             {applicant.status}
           </span>
         </div>
 
-        {/* Buttons */}
+        {/* Actions */}
 
         <div className="mt-6 flex flex-wrap gap-3">
           {applicant.resumeSnapshot?.resumeUrl ? (
             <a
-              href={applicant.resumeSnapshot.resumeUrl}
+              href={
+                applicant.resumeSnapshot.resumeUrl
+              }
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg border px-4 py-2 hover:bg-slate-100"
+              className="rounded-lg border px-4 py-2 transition hover:bg-slate-100"
             >
               Submitted Resume
             </a>
@@ -132,27 +187,45 @@ function ApplicantCard({ applicant, refreshApplicants }) {
 
           <button
             onClick={handleViewATS}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition"
+            disabled={loadingATS}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            ATS Report
+            {loadingATS
+              ? "Loading..."
+              : "View ATS Report"}
           </button>
 
           {canTakeAction && (
             <>
-              {nextStatus[applicant.status] && (
+              {nextStatus[
+                applicant.status
+              ] && (
                 <button
                   onClick={() =>
-                    handleStatusUpdate(nextStatus[applicant.status])
+                    handleStatusUpdate(
+                      nextStatus[
+                        applicant.status
+                      ]
+                    )
                   }
-                  className="rounded-lg border border-green-600 px-4 py-2 text-green-700 hover:bg-green-50 transition"
+                  className="rounded-lg border border-green-600 px-4 py-2 text-green-700 transition hover:bg-green-50"
                 >
-                  Move to {nextStatus[applicant.status]}
+                  Move to{" "}
+                  {
+                    nextStatus[
+                      applicant.status
+                    ]
+                  }
                 </button>
               )}
 
               <button
-                onClick={() => handleStatusUpdate("Rejected")}
-                className="rounded-lg border border-red-600 px-4 py-2 text-red-600 hover:bg-red-50 transition"
+                onClick={() =>
+                  handleStatusUpdate(
+                    "Rejected"
+                  )
+                }
+                className="rounded-lg border border-red-600 px-4 py-2 text-red-600 transition hover:bg-red-50"
               >
                 Reject
               </button>
@@ -165,7 +238,9 @@ function ApplicantCard({ applicant, refreshApplicants }) {
         open={openModal}
         report={report}
         loading={loadingATS}
-        onClose={() => setOpenModal(false)}
+        onClose={() =>
+          setOpenModal(false)
+        }
         onReAnalyze={handleReAnalyze}
       />
     </>

@@ -25,9 +25,6 @@ const result = dotenv.config({
   path: path.resolve(".env"),
 });
 
-console.log(result);
-console.log("PORT:", process.env.PORT);
-console.log("GEMINI:", process.env.GEMINI_API_KEY);
 
 import app from "./app.js";
 import connectDB from "./config/db.js";

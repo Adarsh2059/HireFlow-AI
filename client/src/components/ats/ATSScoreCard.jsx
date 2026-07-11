@@ -1,8 +1,4 @@
-function ATSScoreCard({ jobMatch }) {
-    console.log("ATSScoreCard prop:", jobMatch);
-  const score = jobMatch?.matchPercentage || 0;
-  console.log("Calculated score:", score);
-    
+function ATSScoreCard({ score = 0 }) {
   return (
     <div className="rounded-xl border bg-white p-8 shadow-sm">
       <h2 className="text-xl font-semibold">
