@@ -207,8 +207,6 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
-> 🔒 Never commit your `.env` file. Add it to `.gitignore`.
-
 ---
 
 ## 📡 API Overview
@@ -226,19 +224,6 @@ GEMINI_API_KEY=your_gemini_api_key
 | `GET` | `/api/applications/:id/ats-report` | Fetch AI-generated ATS report |
 | `GET` | `/api/applications/job/:jobId` | Recruiter views ranked applicants for a job |
 | `POST` | `/api/ai/interview-questions/:applicationId` | Generate personalized interview questions |
-
-> ℹ️ Update this table with your exact route names if they differ — this reflects the general shape of the feature set described above.
-
----
-
-## 🖼 Screenshots
-
-> Add screenshots or a demo GIF here to make the README pop — recruiters/reviewers respond strongly to visuals.
-
-```
-📸 Landing Page        📸 Candidate Dashboard
-📸 ATS Report View      📸 Recruiter Pipeline
-```
 
 ---
 
